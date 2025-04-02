@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Food Quality Predictor</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Food Quality Predictor</h1>
+
+    <form id="predictionForm">
+      <label>pH Level <input type="number" name="ph" step="0.01" required></label>
+      <label>Temperature (°C) <input type="number" name="temp" step="0.1" required></label>
+      <label>Fat % <input type="number" name="fat" step="0.01" required></label>
+      <label>Protein % <input type="number" name="protein" step="0.01" required></label>
+      <label>Lactose % <input type="number" name="lactose" step="0.01" required></label>
+      <button type="submit">Predict</button>
+    </form>
+
+    <div class="result">
+      <h2>Prediction Results (Dummy Data)</h2>
+      <canvas id="predictionChart" width="400" height="300"></canvas>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
