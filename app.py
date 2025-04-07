@@ -33,5 +33,5 @@ def predict_datapoint():
         results = predict_pipleline.predict(pipeline)
         return render_template('home.html', results=results[0])
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0",port=5002, debug=True)
 
