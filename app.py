@@ -1,37 +1,45 @@
-from flask import Flask, request, render_template
-import numpy as np
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from src.pipeline.predict_pipeline import PredictPipeline, CustomData
+from src.pipeline.predict_pipeline import Predictor
 
+def get_user_input(features):
+    input_data = {}
+    print("Please enter the following features:")
+    for feature in features:
+        value = input(f"{feature}: ")
+        try:
+            value = float(value)
+        except ValueError:
+            pass
+        input_data[feature] = value
+    return input_data
 
-application = Flask(__name__)
+def main():
+    print("Select the dataset to predict quality for:")
+    print("1. Milk")
+    print("2. Wine")
+    print("3. Water")
+    choice = input("Enter choice (1/2/3): ").strip()
 
-app=application
-#route for home page
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/predictdata', methods = ['Get', 'POST'])
-def predict_datapoint():
-    if request.method == 'GET':
-        return render_template('home.html')
+    if choice == '1':
+        dataset_name = 'milk'
+        features = ['pH', 'Temprature', 'Colour', 'Taste', 'Odor', 'Fat', 'Turbidity']
+    elif choice == '2':
+        dataset_name = 'wine'
+        features = ['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar', 'chlorides',
+                    'free sulfur dioxide', 'total sulfur dioxide', 'density', 'pH', 'sulphates', 'alcohol']
+    elif choice == '3':
+        dataset_name = 'water'
+        features = ['ph', 'Hardness', 'Solids', 'Chloramines', 'Sulfate', 'Conductivity',
+                    'Organic_carbon', 'Trihalomethanes', 'Turbidity']
     else:
-        data= CustomData(
-            gender=request.form.get('gender'),
-            race_ethnicity=request.form.get('ethnicity'),
-            parental_level_of_education=request.form.get('parental_level_of_education'),
-            lunch=request.form.get('lunch'),
-            test_preparation_course=request.form.get('test_preparation_course'),
-            reading_score=float(request.form.get('writing_score')),
-            writing_score=float(request.form.get('writing_score'))
-        )
-        pipeline = data.get_data_as_data_frame()
-        print(pipeline)
-        predict_pipleline = PredictPipeline()
-        results = predict_pipleline.predict(pipeline)
-        return render_template('home.html', results=results[0])
-if __name__ == '__main__':
-    app.run(host="0.0.0.0",port=5002, debug=True)
+        print("Invalid choice. Exiting.")
+        return
 
+    input_data = get_user_input(features)
+
+    predictor = Predictor(dataset_name=dataset_name)
+    prediction = predictor.predict(input_data)
+
+    print(f"Predicted quality for {dataset_name} dataset: {prediction}")
+
+if __name__ == "__main__":
+    main()

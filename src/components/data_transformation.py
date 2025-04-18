@@ -14,8 +14,12 @@ from src.utils import save_object
 
 @dataclass
 class DataTransformationConfig:
-    preprocessor_ob_file_path = os.path.join('artifact', 'preprocessor.pkl')
-    label_encoder_path = os.path.join('artifact', 'label_encoder.pkl')
+    milk_preprocessor_ob_file_path = os.path.join('artifact', 'milk_preprocessor.pkl')
+    milk_label_encoder_path = os.path.join('artifact', 'milk_label_encoder.pkl')
+    wine_preprocessor_ob_file_path = os.path.join('artifact', 'wine_preprocessor.pkl')
+    wine_label_encoder_path = os.path.join('artifact', 'wine_label_encoder.pkl')
+    water_preprocessor_ob_file_path = os.path.join('artifact', 'water_preprocessor.pkl')
+    water_label_encoder_path = os.path.join('artifact', 'water_label_encoder.pkl')
 
 class DataTransformation:
     def __init__(self):
@@ -89,16 +93,16 @@ class DataTransformation:
             logging.info(f"Preprocessing completed")
 
             save_object(
-                file_path=self.data_transformation_config.preprocessor_ob_file_path,
+                file_path=self.data_transformation_config.milk_preprocessor_ob_file_path,
                 obj=preprocessor
             )
             save_object(
-                file_path=self.data_transformation_config.label_encoder_path,
+                file_path=self.data_transformation_config.milk_label_encoder_path,
                 obj=label_encoder
             )
 
 
-            return (train_arr, test_arr, self.data_transformation_config.preprocessor_ob_file_path)
+            return (train_arr, test_arr, self.data_transformation_config.milk_preprocessor_ob_file_path)
 
         except Exception as e:
             raise CustomException(e, sys)
@@ -177,16 +181,16 @@ class DataTransformationWine:
             logging.info(f"Wine preprocessing completed")
 
             save_object(
-                file_path=self.data_transformation_config.preprocessor_ob_file_path,
+                file_path=self.data_transformation_config.wine_preprocessor_ob_file_path,
                 obj=preprocessor
             )
             save_object(
-                file_path=self.data_transformation_config.label_encoder_path,
+                file_path=self.data_transformation_config.wine_label_encoder_path,
                 obj=label_encoder
             )
 
 
-            return (train_arr, test_arr, self.data_transformation_config.preprocessor_ob_file_path)
+            return (train_arr, test_arr, self.data_transformation_config.wine_preprocessor_ob_file_path)
 
         except Exception as e:
             raise CustomException(e, sys)
@@ -264,15 +268,15 @@ class DataTransformationWater:
             logging.info(f"Water preprocessing completed")
 
             save_object(
-                file_path=self.data_transformation_config.preprocessor_ob_file_path,
+                file_path=self.data_transformation_config.water_preprocessor_ob_file_path,
                 obj=preprocessor
             )
             save_object(
-                file_path=self.data_transformation_config.label_encoder_path,
+                file_path=self.data_transformation_config.water_label_encoder_path,
                 obj=label_encoder
             )
 
-            return (train_arr, test_arr, self.data_transformation_config.preprocessor_ob_file_path)
+            return (train_arr, test_arr, self.data_transformation_config.water_preprocessor_ob_file_path)
 
         except Exception as e:
             raise CustomException(e, sys)
