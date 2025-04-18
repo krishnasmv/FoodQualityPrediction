@@ -10,10 +10,16 @@ class Predictor:
         self.dataset_name = dataset_name.lower()
         if self.dataset_name == 'milk':
             self.model_path = os.path.join('artifact', 'milk_model.pkl')
-            self.preprocessor_path = os.path.join('artifact', 'preprocessor.pkl')
+            self.preprocessor_path = os.path.join('artifact', 'milk_preprocessor.pkl')
+            self.quality_mapping = {0: 'bad', 1: 'medium', 2: 'good'}
         elif self.dataset_name == 'wine':
             self.model_path = os.path.join('artifact', 'wine_model.pkl')
-            self.preprocessor_path = os.path.join('artifact', 'preprocessor.pkl')
+            self.preprocessor_path = os.path.join('artifact', 'wine_preprocessor.pkl')
+            self.quality_mapping = {0: 'bad', 1: 'medium', 2: 'good'}
+        elif self.dataset_name == 'water':
+            self.model_path = os.path.join('artifact', 'water_model.pkl')
+            self.preprocessor_path = os.path.join('artifact', 'water_preprocessor.pkl')
+            self.quality_mapping = {0: 'bad', 1: 'good'}  # Assuming water quality is binary
         else:
             raise CustomException(f"Unsupported dataset: {self.dataset_name}", sys)
 
@@ -23,7 +29,7 @@ class Predictor:
     def predict(self, input_data: dict):
         """
         input_data: dict of feature_name: value
-        Returns predicted quality/class
+        Returns predicted quality label (good, medium, bad)
         """
         try:
             # Convert input_data dict to DataFrame
@@ -35,7 +41,10 @@ class Predictor:
             # Predict
             prediction = self.model.predict(input_processed)
 
-            return prediction[0]
+            # Map prediction to quality label
+            quality_label = self.quality_mapping.get(prediction[0], "Unknown")
+
+            return quality_label
 
         except Exception as e:
             raise CustomException(e, sys)
