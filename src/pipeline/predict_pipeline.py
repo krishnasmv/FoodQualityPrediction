@@ -1,49 +1,50 @@
+import os
 import sys
+import numpy as np
 import pandas as pd
-from src.exception import CustomException
 from src.utils import load_object
+from src.exception import CustomException
 
-class PredictPipeline:
-    def __init__(self):
-        pass
-    def predict(self, features):
-        try:
-            model_path = 'artifact\model.pkl'
-            preprocessor_path = 'artifact\preprocessor.pkl'
-            model = load_object(file_path = model_path)
-            preprocessor = load_object(file_path = preprocessor_path)
-            data_scaled = preprocessor.transform(features)
-            prediction = model.predict(data_scaled)
-            return prediction
-        except Exception as e:
-            raise CustomException(e, sys)
+class Predictor:
+    def __init__(self, dataset_name='milk'):
+        self.dataset_name = dataset_name.lower()
+        if self.dataset_name == 'milk':
+            self.model_path = os.path.join('artifact', 'milk_model.pkl')
+            self.preprocessor_path = os.path.join('artifact', 'milk_preprocessor.pkl')
+            self.quality_mapping = {0: 'bad', 1: 'medium', 2: 'good'}
+        elif self.dataset_name == 'wine':
+            self.model_path = os.path.join('artifact', 'wine_model.pkl')
+            self.preprocessor_path = os.path.join('artifact', 'wine_preprocessor.pkl')
+            self.quality_mapping = {0: 'bad', 1: 'medium', 2: 'good'}
+        elif self.dataset_name == 'water':
+            self.model_path = os.path.join('artifact', 'water_model.pkl')
+            self.preprocessor_path = os.path.join('artifact', 'water_preprocessor.pkl')
+            self.quality_mapping = {0: 'bad', 1: 'good'}  # Assuming water quality is binary
+        else:
+            raise CustomException(f"Unsupported dataset: {self.dataset_name}", sys)
 
-class CustomData:
-    def __init__(self, gender:str,
-                 race_ethnicity: str,
-                 parental_level_of_education,
-                 lunch: str,
-                 test_preparation_course: str,
-                 reading_score: int,
-                 writing_score: int):
-        self.gender =gender
-        self.race_ethnicity = race_ethnicity
-        self.parental_level_of_education = parental_level_of_education
-        self.lunch = lunch
-        self.test_preparation_course = test_preparation_course
-        self.reading_score = reading_score
-        self.writing_score = writing_score
-    def get_data_as_data_frame(self):
+        self.model = load_object(self.model_path)
+        self.preprocessor = load_object(self.preprocessor_path)
+
+    def predict(self, input_data: dict):
+        """
+        input_data: dict of feature_name: value
+        Returns predicted quality label (good, medium, bad)
+        """
         try:
-            custom_data_input_dict = {
-                "gender": [self.gender],
-                "race/ethnicity": [self.race_ethnicity],
-                "parental level of education": [self.parental_level_of_education],
-                "lunch": [self.lunch],
-                "test preparation course": [self.test_preparation_course],
-                "reading score": [self.reading_score],
-                "writing score": [self.writing_score]
-            }
-            return pd.DataFrame(custom_data_input_dict)
+            # Convert input_data dict to DataFrame
+            input_df = pd.DataFrame([input_data])
+
+            # Preprocess input features
+            input_processed = self.preprocessor.transform(input_df)
+
+            # Predict
+            prediction = self.model.predict(input_processed)
+
+            # Map prediction to quality label
+            quality_label = self.quality_mapping.get(prediction[0], "Unknown")
+
+            return quality_label
+
         except Exception as e:
             raise CustomException(e, sys)

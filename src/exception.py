@@ -3,8 +3,13 @@ from src.logger import logging
 
 def error_message_detail(error, error_details:sys):
     _,_, exc_traceback = error_details.exc_info()
-    file_name = exc_traceback.tb_frame.f_code.co_filename
-    error_message = "Error in your python file{0} at line {1} and errormessage {2}".format(file_name, exc_traceback.tb_lineno, str(error))
+    if exc_traceback is None:
+        file_name = "Unknown file"
+        line_number = "Unknown line"
+    else:
+        file_name = exc_traceback.tb_frame.f_code.co_filename
+        line_number = exc_traceback.tb_lineno
+    error_message = "Error in your python file {0} at line {1} and errormessage {2}".format(file_name, line_number, str(error))
 
     return error_message
 
