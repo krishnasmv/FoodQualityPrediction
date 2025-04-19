@@ -1,0 +1,68 @@
+<form id="predictionForm">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">pH Level</label>
+            <input type="number" class="form-control" name="pH" step="0.1" min="3" max="9.5" required placeholder="Enter pH value (3.0-9.5)">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Temperature (°C)</label>
+            <input type="number" class="form-control" name="temperature" min="34" max="90" required placeholder="Enter temperature (34-90°C)">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Taste</label>
+            <select class="form-select" name="taste" required>
+                <option value="" disabled selected>Select taste quality</option>
+                <option value="1">Good</option>
+                <option value="0">Bad</option>
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Odor</label>
+            <select class="form-select" name="odor" required>
+                <option value="" disabled selected>Select odor quality</option>
+                <option value="1">Good</option>
+                <option value="0">Bad</option>
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Fat Content</label>
+            <select class="form-select" name="fat" required>
+                <option value="" disabled selected>Select fat content</option>
+                <option value="1">High</option>
+                <option value="0">Low</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Turbidity</label>
+            <select class="form-select" name="turbidity" required>
+                <option value="" disabled selected>Select turbidity level</option>
+                <option value="1">High</option>
+                <option value="0">Low</option>
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Colour (240-255)</label>
+            <input type="number" class="form-control" name="colour" min="240" max="255" required placeholder="Enter color value (240-255)">
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary btn-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search me-2" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            </svg>
+            Predict Quality
+        </button>
+    </div>
+
+    <div id="result" class="mt-4 text-center" style="display: none;">
+        <h4>Prediction Result</h4>
+        <div id="predictionOutput" class="alert" role="alert"></div>
+    </div>
+</form>

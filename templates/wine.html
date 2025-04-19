@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wine Quality Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            background-image: url('../static/images/wine.jpg');
+        }
+    </style>
+</head>
+<body>
+    <div class="back-button-container">
+        <a href="{{ url_for('index') }}" class="back-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            Back to Home
+        </a>
+    </div>
+    <div class="container py-4">
+        <div class="title-container">
+            <h1 class="app-title">Wine Quality Prediction System</h1>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card prediction-card">
+                    <div class="card-body">
+                        {% include 'components/wine_prediction_form.html' %}
+                        
+                        <!-- View More Button (initially hidden) -->
+                        <div id="view-more-container" class="text-center mt-4" style="display: none;">
+                            <button id="view-more-btn" class="btn btn-outline-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up me-2" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/>
+                                </svg>
+                                View Detailed Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Visualization Section -->
+        <div class="row mt-4 justify-content-center" id="visualization-section" style="display: none;">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Wine Quality Analysis Dashboard</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <div id="radar-chart" style="height: 400px;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="row gauge-container">
+                            <div class="col-md-4 mb-4">
+                                <div id="alcohol-gauge" class="gauge-chart"></div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div id="acidity-gauge" class="gauge-chart"></div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div id="sulfur-gauge" class="gauge-chart"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="comparison-chart" style="height: 400px;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header bg-info text-white">
+                                        <h4 class="mb-0">Wine Quality Improvement Recommendations</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="recommendations"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="app-footer">
+            <p>© 2025 Beverage Quality Prediction System | <a href="/" class="text-white">Back to Home</a> | Developed with ❤️ for Wine Industry</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/wine.js') }}"></script>
+</body>
+</html>

@@ -1,31 +1,204 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Food Quality Predictor</title>
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beverage Quality Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('../static/images/download.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .container {
+            background-color: transparent;
+            padding: 30px;
+        }
+        
+        .app-title {
+            color: #2c3e50;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 50px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+        
+        .title-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.7); /* Changed from 0.9 to 0.7 */
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .card-body {
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .card-title {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .card-text {
+            color: #7f8c8d;
+            margin-bottom: 25px;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .app-footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+            color: #fff;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .option-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .option-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        
+        .option-card:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        
+        .option-card:nth-child(3) {
+            animation-delay: 0.5s;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Food Quality Predictor</h1>
-
-    <form id="predictionForm">
-      <label>pH Level <input type="number" name="ph" step="0.01" required></label>
-      <label>Temperature (°C) <input type="number" name="temp" step="0.1" required></label>
-      <label>Fat % <input type="number" name="fat" step="0.01" required></label>
-      <label>Protein % <input type="number" name="protein" step="0.01" required></label>
-      <label>Lactose % <input type="number" name="lactose" step="0.01" required></label>
-      <button type="submit">Predict</button>
-    </form>
-
-    <div class="result">
-      <h2>Prediction Results (Dummy Data)</h2>
-      <canvas id="predictionChart" width="400" height="300"></canvas>
+    <div class="container">
+        <div class="title-container">
+            <h1 class="app-title">Beverage Quality Prediction System</h1>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-4 mb-4 option-card">
+                <div class="card">
+                    <img src="https://placehold.co/600x400/e3f2fd/2c3e50?text=Milk" class="card-img-top" alt="Milk">
+                    <div class="card-body">
+                        <h3 class="card-title">Milk Quality</h3>
+                        <p class="card-text">Analyze and predict the quality of milk based on various parameters like pH, temperature, taste, and more.</p>
+                        <a href="/milk" class="btn btn-primary">Analyze Milk</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4 option-card">
+                <div class="card">
+                    <img src="https://placehold.co/600x400/e8f5e9/2c3e50?text=Water" class="card-img-top" alt="Water">
+                    <div class="card-body">
+                        <h3 class="card-title">Water Quality</h3>
+                        <p class="card-text">Test and predict water quality based on parameters like pH, turbidity, dissolved solids, and contaminants.</p>
+                        <a href="/water" class="btn btn-primary">Analyze Water</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4 option-card">
+                <div class="card">
+                    <img src="https://placehold.co/600x400/fff3e0/2c3e50?text=Wine" class="card-img-top" alt="Wine">
+                    <div class="card-body">
+                        <h3 class="card-title">Wine Quality</h3>
+                        <p class="card-text">Evaluate Wine quality based on parameters like sugar content, acidity, freshness, and nutritional value.</p>
+                        <a href="/wine" class="btn btn-primary">Analyze Wine</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="app-footer">
+            <p>© 2025 Beverage Quality Prediction System | Developed with ❤️ for Food & Beverage Industry</p>
+        </div>
     </div>
-  </div>
-
-  <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effect to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px)';
+                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.2)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                });
+            });
+        });
+    </script>
 </body>
 </html>
