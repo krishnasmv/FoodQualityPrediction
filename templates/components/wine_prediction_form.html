@@ -1,0 +1,71 @@
+<form id="predictionForm">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Fixed Acidity (g/L)</label>
+            <input type="number" class="form-control" name="fixed_acidity" step="0.01" min="3" max="15" required placeholder="Enter fixed acidity (3-15 g/L)">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Volatile Acidity (g/L)</label>
+            <input type="number" class="form-control" name="volatile_acidity" step="0.01" min="0" max="1.5" required placeholder="Enter volatile acidity (0-1.5 g/L)">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Citric Acid (g/L)</label>
+            <input type="number" class="form-control" name="citric_acid" step="0.01" min="0" max="1" required placeholder="Enter citric acid (0-1 g/L)">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Residual Sugar (g/L)</label>
+            <input type="number" class="form-control" name="residual_sugar" step="0.01" min="0" max="20" required placeholder="Enter residual sugar (0-20 g/L)">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Chlorides (g/L)</label>
+            <input type="number" class="form-control" name="chlorides" step="0.001" min="0" max="0.5" required placeholder="Enter chlorides (0-0.5 g/L)">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Free Sulfur Dioxide (mg/L)</label>
+            <input type="number" class="form-control" name="free_sulfur_dioxide" step="1" min="0" max="100" required placeholder="Enter free SO2 (0-100 mg/L)">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Total Sulfur Dioxide (mg/L)</label>
+            <input type="number" class="form-control" name="total_sulfur_dioxide" step="1" min="0" max="300" required placeholder="Enter total SO2 (0-300 mg/L)">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Density (g/cm³)</label>
+            <input type="number" class="form-control" name="density" step="0.0001" min="0.9" max="1.1" required placeholder="Enter density (0.9-1.1 g/cm³)">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">pH</label>
+            <input type="number" class="form-control" name="ph" step="0.01" min="2.5" max="4.5" required placeholder="Enter pH (2.5-4.5)">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Sulphates (g/L)</label>
+            <input type="number" class="form-control" name="sulphates" step="0.01" min="0" max="2" required placeholder="Enter sulphates (0-2 g/L)">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Alcohol (% vol.)</label>
+            <input type="number" class="form-control" name="alcohol" step="0.1" min="8" max="15" required placeholder="Enter alcohol (8-15% vol.)">
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary btn-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search me-2" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            </svg>
+            Predict Quality
+        </button>
+    </div>
+
+    <div id="result" class="mt-4 text-center" style="display: none;">
+        <h4>Prediction Result</h4>
+        <div id="predictionOutput" class="alert" role="alert"></div>
+    </div>
+</form>

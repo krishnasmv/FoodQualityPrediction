@@ -1,0 +1,60 @@
+<form id="predictionForm">
+    <div class="row">
+    <div class="col-md-4 mb-3">
+    <label class="form-label">pH Level</label>
+    <input type="number" class="form-control" name="ph" step="0.01" min="0" max="14" required placeholder="Enter pH value (0-14)">
+    </div>
+    <div class="col-md-4 mb-3">
+    <label class="form-label">Hardness (mg/L)</label>
+    <input type="number" class="form-control" name="hardness" step="0.01" min="0" max="500" required placeholder="Enter hardness value">
+    </div>
+    <div class="col-md-4 mb-3">
+    <label class="form-label">Solids (ppm)</label>
+    <input type="number" class="form-control" name="solids" step="0.01" min="0" max="60000" required placeholder="Enter total dissolved solids">
+    </div>
+    </div>
+
+    <div class="row">
+    <div class="col-md-4 mb-3">
+    <label class="form-label">Chloramines (ppm)</label>
+    <input type="number" class="form-control" name="chloramines" step="0.01" min="0" max="15" required placeholder="Enter chloramines level">
+    </div>
+    <div class="col-md-4 mb-3">
+    <label class="form-label">Sulfate (mg/L)</label>
+    <input type="number" class="form-control" name="sulfate" step="0.01" min="0" max="500" required placeholder="Enter sulfate content">
+    </div>
+    <div class="col-md-4 mb-3">
+    <label class="form-label">Conductivity (μS/cm)</label>
+    <input type="number" class="form-control" name="conductivity" step="0.01" min="0" max="1000" required placeholder="Enter conductivity value">
+    </div>
+    </div>
+
+    <div class="row">
+    <div class="col-md-4 mb-3">
+    <label class="form-label">Organic Carbon (ppm)</label>
+    <input type="number" class="form-control" name="organic_carbon" step="0.01" min="0" max="30" required placeholder="Enter organic carbon level">
+    </div>
+    <div class="col-md-4 mb-3">
+    <label class="form-label">Trihalomethanes (μg/L)</label>
+    <input type="number" class="form-control" name="trihalomethanes" step="0.01" min="0" max="150" required placeholder="Enter trihalomethanes level">
+    </div>
+    <div class="col-md-4 mb-3">
+    <label class="form-label">Turbidity (NTU)</label>
+    <input type="number" class="form-control" name="turbidity" step="0.01" min="0" max="10" required placeholder="Enter turbidity level">
+    </div>
+    </div>
+
+    <div class="text-center mt-4">
+    <button type="submit" class="btn btn-primary btn-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search me-2" viewBox="0 0 16 16">
+    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+    </svg>
+    Predict Potability
+    </button>
+    </div>
+
+    <div id="result" class="mt-4 text-center" style="display: none;">
+    <h4>Prediction Result</h4>
+    <div id="predictionOutput" class="alert" role="alert"></div>
+    </div>
+</form>
