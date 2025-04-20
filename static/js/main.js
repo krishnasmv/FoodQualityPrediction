@@ -74,18 +74,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (predResult.status === 'success') {
                 // Set appropriate alert color based on prediction
                 let alertClass = 'alert-success';
-                let qualityClass = 'quality-high';
+                let qualityClass = 'quality-good';
                 
-                if (predResult.prediction.toLowerCase() === 'low') {
+                if (predResult.prediction.toLowerCase() === 'bad') {
                     alertClass = 'alert-danger';
-                    qualityClass = 'quality-low';
+                    qualityClass = 'quality-bad';
                 } else if (predResult.prediction.toLowerCase() === 'medium') {
                     alertClass = 'alert-warning';
                     qualityClass = 'quality-medium';
                 }
                 
                 output.className = `alert ${alertClass}`;
-                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${predResult.prediction.toUpperCase()}</span> (Confidence: ${(predResult.confidence * 100).toFixed(2)}%)`;
+                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${predResult.prediction.toUpperCase()}</span> `;
                 
                 // Store the form data for later use
                 window.milkData = data;

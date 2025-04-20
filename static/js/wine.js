@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 output.className = `alert ${alertClass}`;
-                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${qualityText}</span> (Score: ${quality}/10, Confidence: ${(predResult.confidence * 100).toFixed(2)}%)`;
+                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${qualityText}</span>`;
                 
                 // Store the form data for later use
                 window.wineData = data;
