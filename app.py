@@ -1,14 +1,14 @@
-
 from flask import Flask, render_template, request, jsonify
-from src.predictor import MilkQualityPredictor, WaterQualityPredictor, WineQualityPredictor
 import os
+import sys
+from src.pipeline.predict_pipeline import Predictor
 
 app = Flask(__name__)
 
 # Initialize predictors
-milk_predictor = MilkQualityPredictor()
-water_predictor = WaterQualityPredictor()
-wine_predictor = WineQualityPredictor()
+milk_predictor = Predictor(dataset_name='milk')
+water_predictor = Predictor(dataset_name='water')
+wine_predictor = Predictor(dataset_name='wine')
 
 @app.route('/')
 def index():
@@ -45,12 +45,11 @@ def predict_milk():
             'Colour': float(data['colour'])
         }
 
-        prediction, confidence = milk_predictor.predict(features)
+        prediction = milk_predictor.predict(features)
 
         return jsonify({
             'status': 'success',
-            'prediction': prediction,
-            'confidence': confidence
+            'prediction': prediction
         })
     except Exception as e:
         return jsonify({
@@ -75,12 +74,11 @@ def predict_water():
             'Turbidity': float(data['turbidity'])
         }
 
-        prediction, confidence = water_predictor.predict(features)
+        prediction = water_predictor.predict(features)
 
         return jsonify({
             'status': 'success',
-            'prediction': prediction,
-            'confidence': confidence
+            'prediction': prediction
         })
     except Exception as e:
         return jsonify({
@@ -107,12 +105,11 @@ def predict_wine():
             'alcohol': float(data['alcohol'])
         }
 
-        prediction, confidence = wine_predictor.predict(features)
+        prediction = wine_predictor.predict(features)
 
         return jsonify({
             'status': 'success',
-            'prediction': prediction,
-            'confidence': confidence
+            'prediction': prediction
         })
     except Exception as e:
         return jsonify({
@@ -130,17 +127,6 @@ def server_error(e):
     """Handle 500 errors"""
     return render_template('500.html'), 500
 
-if __name__ == '__main__':
-    # Get port from environment variable or use 5000 as default
-    port = int(os.environ.get('PORT', 5000))
-
-    # Set debug mode based on environment
-    debug = os.environ.get('FLASK_ENV', 'development') == 'development'
-
-    app.run(host='0.0.0.0', port=port, debug=debug)
-=======
-from src.pipeline.predict_pipeline import Predictor
-
 def get_user_input(features):
     input_data = {}
     print("Please enter the following features:")
@@ -153,7 +139,7 @@ def get_user_input(features):
         input_data[feature] = value
     return input_data
 
-def main():
+def cli_main():
     print("Select the dataset to predict quality for:")
     print("1. Milk")
     print("2. Wine")
@@ -182,6 +168,14 @@ def main():
 
     print(f"Predicted quality for {dataset_name} dataset: {prediction}")
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == '--cli':
+        cli_main()
+    else:
+        # Get port from environment variable or use 5000 as default
+        port = int(os.environ.get('PORT', 5005))
 
+        # Set debug mode based on environment
+        debug = os.environ.get('FLASK_ENV', 'development') == 'development'
+
+        app.run(host='0.0.0.0', port=port, debug=debug)

@@ -122,11 +122,13 @@ if __name__ == "__main__":
 
     train_arr, test_arr, _ = data_transformation.initiate_data_transformation(train_data, test_data)
     logging.info("Data transformation completed")
+    print("Data transformation completed")
 
     # Run model training
     model_trainer = ModelTrainer(dataset_name=dataset_name)
     metrics = model_trainer.initiate_model_trainer(train_arr, test_arr)
     logging.info(f"Model training completed with accuracy: {metrics['test_accuracy']:.4f}")
+    print(f"Model training completed with accuracy: {metrics['test_accuracy']:.4f}")
     print(f"Best model: {metrics['model_name']}")
     print(f"Test accuracy: {metrics['test_accuracy']:.4f}")
     print(f"F1 score: {metrics['f1_score']:.4f}")
