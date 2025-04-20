@@ -59,6 +59,7 @@
             </svg>
             Predict Quality
         </button>
+        <button type="button" class="btn btn-warning btn-sm" onclick="autofillValues()">">Sample Values</button>
     </div>
 
     <div id="result" class="mt-4 text-center" style="display: none;">
@@ -66,3 +67,17 @@
         <div id="predictionOutput" class="alert" role="alert"></div>
     </div>
 </form>
+
+<script>
+    function autofillValues() {
+      const form = document.forms['predictionForm'];
+  
+      form.elements['pH'].value = 6.8;
+      form.elements['temperature'].value = 35;
+      form.elements['taste'].value = "1";
+      form.elements['odor'].value = "1";
+      form.elements['fat'].value = "0";
+      form.elements['turbidity'].value = "0";
+      form.elements['colour'].value = 255;
+    }
+  </script>

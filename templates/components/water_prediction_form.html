@@ -51,6 +51,9 @@
     </svg>
     Predict Potability
     </button>
+    <button type="button" class="btn btn-warning btn-sm" onclick="autofillValues()">
+        Autofill Sample Data
+      </button>
     </div>
 
     <div id="result" class="mt-4 text-center" style="display: none;">
@@ -58,3 +61,20 @@
     <div id="predictionOutput" class="alert" role="alert"></div>
     </div>
 </form>
+
+<script>
+    function autofillValues() {
+      const form = document.forms['predictionForm'];
+  
+      form.elements['ph'].value = 7.2;
+      form.elements['hardness'].value = 140;
+      form.elements['solids'].value = 20000;
+      form.elements['chloramines'].value = 6.5;
+      form.elements['sulfate'].value = 320;
+      form.elements['conductivity'].value = 420;
+      form.elements['organic_carbon'].value = 12;
+      form.elements['trihalomethanes'].value = 80;
+      form.elements['turbidity'].value = 3.5;
+    }
+  </script>
+  

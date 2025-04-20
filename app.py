@@ -37,7 +37,7 @@ def predict_milk():
         data = request.json
         features = {
             'pH': float(data['pH']),
-            'Temperature': float(data['temperature']),
+            'Temprature': float(data['temperature']),
             'Taste': int(data['taste']),
             'Odor': int(data['odor']),
             'Fat': int(data['fat']),
