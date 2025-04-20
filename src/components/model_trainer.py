@@ -82,8 +82,8 @@ class ModelTrainer:
                 f1 = f1_score(y_test, y_pred, average='weighted')
 
                 logging.info(f"Best model test accuracy: {test_accuracy:.4f}")
-                logging.info(f"Confusion Matrix:\n{conf_matrix}")
-                logging.info(f"Classification Report:\n{class_report}")
+                logging.info(f"Confusion Matrix:\\n{conf_matrix}")
+                logging.info(f"Classification Report:\\n{class_report}")
                 logging.info(f"F1 Score: {f1:.4f}")
 
                 model_path = self.model_trainer_config.wine_trained_model_file_path
@@ -102,7 +102,6 @@ class ModelTrainer:
                 }
 
             elif self.dataset_name == 'water':
-                # For water dataset, use similar approach as milk with hyperparameter tuning
                 models = {
                     "LogisticRegression": LogisticRegression(max_iter=1000),
                     "DecisionTreeClassifier": DecisionTreeClassifier(),
@@ -184,18 +183,16 @@ class ModelTrainer:
 
                 logging.info(f"Best model selected: {best_model_name} with accuracy: {best_score:.4f}")
 
-                # Predict on test data
                 y_pred = best_model.predict(X_test)
 
-                # Calculate evaluation metrics
                 test_accuracy = accuracy_score(y_test, y_pred)
                 conf_matrix = confusion_matrix(y_test, y_pred)
                 class_report = classification_report(y_test, y_pred)
                 f1 = f1_score(y_test, y_pred, average='weighted')
 
                 logging.info(f"Test accuracy of best model {best_model_name}: {test_accuracy:.4f}")
-                logging.info(f"Confusion Matrix:\n{conf_matrix}")
-                logging.info(f"Classification Report:\n{class_report}")
+                logging.info(f"Confusion Matrix:\\n{conf_matrix}")
+                logging.info(f"Classification Report:\\n{class_report}")
                 logging.info(f"F1 Score: {f1:.4f}")
 
                 model_path = self.model_trainer_config.water_trained_model_file_path
@@ -214,7 +211,6 @@ class ModelTrainer:
                 }
 
             else:
-                # For milk dataset, use previous approach with hyperparameter tuning
                 models = {
                     "LogisticRegression": LogisticRegression(max_iter=1000),
                     "DecisionTreeClassifier": DecisionTreeClassifier(),
@@ -296,18 +292,16 @@ class ModelTrainer:
 
                 logging.info(f"Best model selected: {best_model_name} with accuracy: {best_score:.4f}")
 
-                # Predict on test data
                 y_pred = best_model.predict(X_test)
 
-                # Calculate evaluation metrics
                 test_accuracy = accuracy_score(y_test, y_pred)
                 conf_matrix = confusion_matrix(y_test, y_pred)
                 class_report = classification_report(y_test, y_pred)
                 f1 = f1_score(y_test, y_pred, average='weighted')
 
                 logging.info(f"Test accuracy of best model {best_model_name}: {test_accuracy:.4f}")
-                logging.info(f"Confusion Matrix:\n{conf_matrix}")
-                logging.info(f"Classification Report:\n{class_report}")
+                logging.info(f"Confusion Matrix:\\n{conf_matrix}")
+                logging.info(f"Classification Report:\\n{class_report}")
                 logging.info(f"F1 Score: {f1:.4f}")
 
                 model_path = self.model_trainer_config.milk_trained_model_file_path
