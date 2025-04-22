@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const predictionForm = document.getElementById('predictionForm');
+    const predictionForm = document.getElementById('waterPredictionForm');
     const viewMoreBtn = document.getElementById('view-more-btn');
     const viewMoreContainer = document.getElementById('view-more-container');
     
@@ -76,12 +76,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 let alertClass = 'alert-success';
                 let qualityClass = 'quality-high';
                 
-                if (predResult.prediction === 0) {
+                if (predResult.prediction.toLowerCase() === 'bad') {
                     alertClass = 'alert-danger';
                     qualityClass = 'quality-low';
                     predResult.prediction = 'Not Potable';
-                } else {
+                } else if (predResult.prediction.toLowerCase() === 'good') {
+                    alertClass = 'alert-success';
+                    qualityClass = 'quality-high';
                     predResult.prediction = 'Potable';
+                } else {
+                    predResult.prediction = 'Unknown';
                 }
                 
                 output.className = `alert ${alertClass}`;

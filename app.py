@@ -2,12 +2,13 @@ from flask import Flask, render_template, request, jsonify
 import os
 import sys
 from src.pipeline.predict_pipeline import Predictor
+from src.pipeline.water_predict_pipeline import WaterPredictor
 
 app = Flask(__name__)
 
 # Initialize predictors
 milk_predictor = Predictor(dataset_name='milk')
-water_predictor = Predictor(dataset_name='water')
+water_predictor = WaterPredictor()
 wine_predictor = Predictor(dataset_name='wine')
 
 @app.route('/')
@@ -62,6 +63,7 @@ def predict_water():
     """API endpoint for water quality prediction"""
     try:
         data = request.json
+        print("Received data for water prediction:", data)
         features = {
             'ph': float(data['ph']),
             'Hardness': float(data['hardness']),
@@ -73,14 +75,17 @@ def predict_water():
             'Trihalomethanes': float(data['trihalomethanes']),
             'Turbidity': float(data['turbidity'])
         }
+        print("Features prepared for prediction:", features)
 
         prediction = water_predictor.predict(features)
+        print("Prediction result:", prediction)
 
         return jsonify({
             'status': 'success',
             'prediction': prediction
         })
     except Exception as e:
+        print("Error during water prediction:", e)
         return jsonify({
             'status': 'error',
             'message': str(e)
