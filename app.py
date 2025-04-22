@@ -7,9 +7,11 @@ from src.pipeline.water_predict_pipeline import WaterPredictor
 app = Flask(__name__)
 
 # Initialize predictors
+from src.pipeline.wine_predict_pipeline import WinePredictor
+
 milk_predictor = Predictor(dataset_name='milk')
 water_predictor = WaterPredictor()
-wine_predictor = Predictor(dataset_name='wine')
+wine_predictor = WinePredictor()
 
 @app.route('/')
 def index():
@@ -110,11 +112,27 @@ def predict_wine():
             'alcohol': float(data['alcohol'])
         }
 
+        # Capture logs during prediction
+        import io
+        import logging
+        log_stream = io.StringIO()
+        handler = logging.StreamHandler(log_stream)
+        logger = logging.getLogger()
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+
         prediction = wine_predictor.predict(features)
+
+        # Flush and remove handler
+        handler.flush()
+        logger.removeHandler(handler)
+        log_contents = log_stream.getvalue()
+        log_stream.close()
 
         return jsonify({
             'status': 'success',
-            'prediction': prediction
+            'prediction': prediction,
+            'logs': log_contents
         })
     except Exception as e:
         return jsonify({
@@ -168,7 +186,19 @@ def cli_main():
 
     input_data = get_user_input(features)
 
-    predictor = Predictor(dataset_name=dataset_name)
+    if dataset_name == 'milk':
+        from src.pipeline.predict_pipeline import Predictor
+        predictor = Predictor(dataset_name='milk')
+    elif dataset_name == 'wine':
+        from src.pipeline.wine_predict_pipeline import WinePredictor
+        predictor = WinePredictor()
+    elif dataset_name == 'water':
+        from src.pipeline.water_predict_pipeline import WaterPredictor
+        predictor = WaterPredictor()
+    else:
+        print("Unsupported dataset selected.")
+        return
+
     prediction = predictor.predict(input_data)
 
     print(f"Predicted quality for {dataset_name} dataset: {prediction}")

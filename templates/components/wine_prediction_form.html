@@ -73,27 +73,67 @@
 
 <script>
     function autofillValues() {
-        const form = document.getElementById('predictionForm');
-        const values = {
-            fixed_acidity: 7.2,
-            volatile_acidity: 0.35,
-            citric_acid: 0.45,
-            residual_sugar: 5.8,
-            chlorides: 0.045,
-            free_sulfur_dioxide: 30,
-            total_sulfur_dioxide: 120,
-            density: 0.9945,
-            ph: 3.2,
-            sulphates: 0.65,
-            alcohol: 11.5
-        };
-    
-        for (const [name, value] of Object.entries(values)) {
-            const input = form.querySelector(`[name="${name}"]`);
-            if (input) {
-                input.value = value;
-            }
+      const form = document.getElementById('predictionForm');
+  
+      const dataSets = [
+        {
+          fixed_acidity: 8.3,
+          volatile_acidity: 0.67,
+          citric_acid: 0.26,
+          residual_sugar: 2.1,
+          chlorides: 0.08,
+          free_sulfur_dioxide: 11,
+          total_sulfur_dioxide: 43,
+          density: 0.9945,
+          ph: 3.31,
+          sulphates: 0.53,
+          alcohol: 9.2
+        },
+        {
+          fixed_acidity: 8.6,
+          volatile_acidity: 0.42,
+          citric_acid: 0.39,
+          residual_sugar: 1.8,
+          chlorides: 0.06,
+          free_sulfur_dioxide: 6.0,
+          total_sulfur_dioxide: 12.0,
+          density: 0.9951,
+          ph: 3.35,
+          sulphates: 0.69,
+          alcohol: 11.7
+        },
+        {
+          fixed_acidity: 8.5,
+          volatile_acidity: 0.28,
+          citric_acid: 0.56,
+          residual_sugar: 1.8,
+          chlorides: 0.09,
+          free_sulfur_dioxide: 35,
+          total_sulfur_dioxide: 103,
+          density: 0.99,
+          ph: 3.3,
+          sulphates: 0.75,
+          alcohol: 10.5
         }
+      ];
+  
+      // Get two different random indices
+      let index1 = Math.floor(Math.random() * dataSets.length);
+      let index2;
+      do {
+        index2 = Math.floor(Math.random() * dataSets.length);
+      } while (index1 === index2);
+  
+      const chosenSet = Math.random() < 0.5 ? dataSets[index1] : dataSets[index2];
+  
+      // Autofill form with one of the selected sets
+      for (const [name, value] of Object.entries(chosenSet)) {
+        const input = form.querySelector(`[name="${name}"]`);
+        if (input) {
+          input.value = value;
+        }
+      }
     }
-    </script>
+  </script>
+  
     

@@ -80,14 +80,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Wine quality is typically rated on a scale of 0-10
                 const quality = predResult.prediction;
                 
-                if (quality <= 4) {
+                if (quality === 'bad' || quality === 'Low') {
                     alertClass = 'alert-danger';
                     qualityClass = 'quality-low';
                     qualityText = 'Low';
-                } else if (quality <= 6) {
+                } else if (quality === 'average' || quality === 'Medium') {
                     alertClass = 'alert-warning';
                     qualityClass = 'quality-medium';
                     qualityText = 'Medium';
+                } else if (quality === 'good' || quality === 'High') {
+                    alertClass = 'alert-success';
+                    qualityClass = 'quality-high';
+                    qualityText = 'High';
+                } else {
+                    alertClass = 'alert-secondary';
+                    qualityClass = 'quality-unknown';
+                    qualityText = quality;
                 }
                 
                 output.className = `alert ${alertClass}`;
@@ -109,6 +117,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     viewMoreContainer.style.opacity = '1';
                     viewMoreContainer.style.transform = 'translateY(0)';
                 }, 300);
+                
+                // Display logs from backend
+                if (predResult.logs) {
+                    const logsContainer = document.getElementById('predictionLogs');
+                    if (!logsContainer) {
+                        const newLogsDiv = document.createElement('div');
+                        newLogsDiv.id = 'predictionLogs';
+                        newLogsDiv.style.whiteSpace = 'pre-wrap';
+                        newLogsDiv.style.backgroundColor = '#f8f9fa';
+                        newLogsDiv.style.border = '1px solid #ddd';
+                        newLogsDiv.style.padding = '10px';
+                        newLogsDiv.style.marginTop = '15px';
+                        newLogsDiv.style.maxHeight = '200px';
+                        newLogsDiv.style.overflowY = 'auto';
+                        resultDiv.appendChild(newLogsDiv);
+                    }
+                    document.getElementById('predictionLogs').textContent = predResult.logs;
+                }
                 
             } else {
                 output.className = 'alert alert-danger';

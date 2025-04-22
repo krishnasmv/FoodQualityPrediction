@@ -62,18 +62,63 @@
 </form>
 
 <script>
-    function autofillValues() {
-      const form = document.forms['predictionForm'];
-  
-      form.elements['ph'].value = 7.2;
-      form.elements['hardness'].value = 140;
-      form.elements['solids'].value = 20000;
-      form.elements['chloramines'].value = 6.5;
-      form.elements['sulfate'].value = 320;
-      form.elements['conductivity'].value = 420;
-      form.elements['organic_carbon'].value = 12;
-      form.elements['trihalomethanes'].value = 80;
-      form.elements['turbidity'].value = 3.5;
-    }
-  </script>
-  
+  function autofillValues() {
+    const form = document.forms['waterPredictionForm'];
+
+    const dataSets = [
+      {
+        ph: 7.56,
+        hardness: 199.10,
+        solids: 18629.11,
+        chloramines: 6.05,
+        sulfate: 382.8,
+        conductivity: 469.54,
+        organic_carbon: 21.27,
+        trihalomethanes: 91.29,
+        turbidity: 5.18
+      },
+      {
+        ph: 5.64,
+        hardness: 156.5,
+        solids: 14275.06,
+        chloramines: 7.60,
+        sulfate: 330,
+        conductivity: 413.460,
+        organic_carbon: 13.00,
+        trihalomethanes: 89.70,
+        turbidity: 5.77
+      },
+      {
+        ph: 7.22,
+        hardness: 180.0,
+        solids: 17000.0,
+        chloramines: 5.2,
+        sulfate: 350.0,
+        conductivity: 450.0,
+        organic_carbon: 20.0,
+        trihalomethanes: 70.0,
+        turbidity: 5.0
+      }
+    ];
+
+    // Get two different random indices
+    let index1 = Math.floor(Math.random() * dataSets.length);
+    let index2;
+    do {
+      index2 = Math.floor(Math.random() * dataSets.length);
+    } while (index1 === index2); // ensure different sets
+
+    const chosenSet = Math.random() < 0.5 ? dataSets[index1] : dataSets[index2];
+
+    // Autofill with one of the selected sets
+    form.elements['ph'].value = chosenSet.ph;
+    form.elements['hardness'].value = chosenSet.hardness;
+    form.elements['solids'].value = chosenSet.solids;
+    form.elements['chloramines'].value = chosenSet.chloramines;
+    form.elements['sulfate'].value = chosenSet.sulfate;
+    form.elements['conductivity'].value = chosenSet.conductivity;
+    form.elements['organic_carbon'].value = chosenSet.organic_carbon;
+    form.elements['trihalomethanes'].value = chosenSet.trihalomethanes;
+    form.elements['turbidity'].value = chosenSet.turbidity;
+  }
+</script>
