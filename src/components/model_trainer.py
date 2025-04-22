@@ -38,42 +38,86 @@ class ModelTrainer:
             )
 
             if self.dataset_name == 'wine':
-                base_estimators = [
-                    ('rf', RandomForestClassifier(n_estimators=200, random_state=42, class_weight='balanced')),
-                    ('gb', GradientBoostingClassifier(n_estimators=200, learning_rate=0.1, random_state=42)),
-                    ('xgb', XGBClassifier(n_estimators=200, learning_rate=0.1, use_label_encoder=False, eval_metric='logloss', random_state=42)),
-                    ('lr', LogisticRegression(max_iter=1000, class_weight='balanced')),
-                    ('svc', SVC(probability=True, class_weight='balanced'))
-                ]
+                models = {
+                    "LogisticRegression": LogisticRegression(max_iter=1000, class_weight='balanced'),
+                    "DecisionTreeClassifier": DecisionTreeClassifier(),
+                    "RandomForestClassifier": RandomForestClassifier(class_weight='balanced'),
+                    "ExtraTreesClassifier": ExtraTreesClassifier(class_weight='balanced'),
+                    "SVC": SVC(probability=True, class_weight='balanced'),
+                    "KNeighborsClassifier": KNeighborsClassifier(),
+                    "GradientBoostingClassifier": GradientBoostingClassifier(),
+                    "AdaBoostClassifier": AdaBoostClassifier(),
+                    "CatBoostClassifier": CatBoostClassifier(verbose=0)
+                }
 
-                stacking_clf = StackingClassifier(
-                    estimators=base_estimators,
-                    final_estimator=LogisticRegression(),
-                    cv=5,
-                    n_jobs=-1
-                )
-
-                model = stacking_clf
+                param_grids = {
+                    "LogisticRegression": {
+                        'C': [0.01, 0.1, 1, 10],
+                        'solver': ['lbfgs', 'liblinear']
+                    },
+                    "RandomForestClassifier": {
+                        'n_estimators': [50, 100, 200],
+                        'max_depth': [None, 10, 20, 30]
+                    },
+                    "ExtraTreesClassifier": {
+                        'n_estimators': [50, 100, 200],
+                        'max_depth': [None, 10, 20, 30]
+                    },
+                    "GradientBoostingClassifier": {
+                        'n_estimators': [100, 200],
+                        'learning_rate': [0.05, 0.1],
+                        'max_depth': [3, 5]
+                    },
+                    "AdaBoostClassifier": {
+                        'n_estimators': [50, 100, 200],
+                        'learning_rate': [0.05, 0.1, 0.5]
+                    },
+                    "SVC": {
+                        'C': [0.1, 1, 10],
+                        'kernel': ['linear', 'rbf'],
+                        'gamma': ['scale', 'auto']
+                    },
+                    "CatBoostClassifier": {
+                        'iterations': [100, 200, 300],
+                        'depth': [4, 6, 8],
+                        'learning_rate': [0.01, 0.05, 0.1],
+                        'l2_leaf_reg': [1, 3, 5]
+                    }
+                }
 
                 best_model = None
                 best_score = 0
-                best_model_name = "StackingClassifier"
+                best_model_name = None
 
-                for i in range(self.max_iter):
-                    logging.info(f"Training iteration {i+1}/{self.max_iter}")
-                    model.fit(X_train, y_train)
-                    y_pred = model.predict(X_test)
-                    accuracy = accuracy_score(y_test, y_pred)
-                    logging.info(f"Iteration {i+1} accuracy: {accuracy:.4f}")
-                    if accuracy > best_score:
-                        best_score = accuracy
-                        best_model = model
-                    if accuracy >= self.target_accuracy:
-                        logging.info(f"Target accuracy {self.target_accuracy} reached at iteration {i+1}")
-                        break
+                for model_name, model in models.items():
+                    logging.info(f"Evaluating model: {model_name}")
+                    try:
+                        if model_name in param_grids:
+                            grid = GridSearchCV(model, param_grids[model_name], cv=3, scoring='accuracy', n_jobs=-1)
+                            grid.fit(X_train, y_train)
+                            mean_accuracy = grid.best_score_
+                            best_estimator = grid.best_estimator_
+                            logging.info(f"Best params for {model_name}: {grid.best_params_}")
+                        else:
+                            accuracies = cross_val_score(model, X_train, y_train, scoring='accuracy', cv=5)
+                            mean_accuracy = accuracies.mean()
+                            best_estimator = model
+                            best_estimator.fit(X_train, y_train)
+
+                        logging.info(f"Cross-validation accuracy for {model_name}: {mean_accuracy:.4f}")
+
+                        if mean_accuracy > best_score:
+                            best_score = mean_accuracy
+                            best_model = best_estimator
+                            best_model_name = model_name
+
+                    except Exception as e:
+                        logging.error(f"Model {model_name} failed during evaluation: {e}")
 
                 if best_model is None:
-                    raise CustomException("No best model found after training iterations", sys)
+                    raise CustomException("No best model found after evaluation", sys)
+
+                logging.info(f"Best model selected: {best_model_name} with accuracy: {best_score:.4f}")
 
                 y_pred = best_model.predict(X_test)
                 test_accuracy = accuracy_score(y_test, y_pred)
@@ -81,7 +125,7 @@ class ModelTrainer:
                 class_report = classification_report(y_test, y_pred)
                 f1 = f1_score(y_test, y_pred, average='weighted')
 
-                logging.info(f"Best model test accuracy: {test_accuracy:.4f}")
+                logging.info(f"Test accuracy of best model {best_model_name}: {test_accuracy:.4f}")
                 logging.info(f"Confusion Matrix:\\n{conf_matrix}")
                 logging.info(f"Classification Report:\\n{class_report}")
                 logging.info(f"F1 Score: {f1:.4f}")
