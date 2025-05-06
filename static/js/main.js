@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 output.className = `alert ${alertClass}`;
-                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${predResult.prediction.toUpperCase()}</span> (Confidence: ${(predResult.confidence * 100).toFixed(2)}%)`;
+                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${predResult.prediction.toUpperCase()}`;
                 
                 // Store the form data for later use
                 window.milkData = data;
