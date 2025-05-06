@@ -74,18 +74,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (predResult.status === 'success') {
                 // Set appropriate alert color based on prediction
                 let alertClass = 'alert-success';
-                let qualityClass = 'quality-good';
+                let qualityClass = 'quality-high';
                 
-                if (predResult.prediction.toLowerCase() === 'bad') {
+                if (predResult.prediction.toLowerCase() === 'low') {
                     alertClass = 'alert-danger';
-                    qualityClass = 'quality-bad';
+                    qualityClass = 'quality-low';
                 } else if (predResult.prediction.toLowerCase() === 'medium') {
                     alertClass = 'alert-warning';
                     qualityClass = 'quality-medium';
                 }
                 
                 output.className = `alert ${alertClass}`;
-                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${predResult.prediction.toUpperCase()}</span> `;
+                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${predResult.prediction.toUpperCase()}</span> (Confidence: ${(predResult.confidence * 100).toFixed(2)}%)`;
                 
                 // Store the form data for later use
                 window.milkData = data;
@@ -139,184 +139,264 @@ function createVisualizations(data) {
     generateRecommendations(data);
 }
 
-// Function to create gauge charts
+// Function to create bullet charts (replacing gauge charts)
 function createGaugeCharts(data) {
-    // pH Gauge
+    // Define ideal values
+    const idealValues = {
+        'pH': 6.8,
+        'temperature': 37.0,
+        'colour': 253.0
+    };
+    
+    // pH Bullet Chart
     const phValue = parseFloat(data.pH);
-    const phGauge = {
-        type: 'indicator',
-        mode: 'gauge+number',
-        value: phValue,
-        title: { text: 'pH Level', font: { size: 24 } },
-        gauge: {
-            axis: { range: [3, 9.5], tickwidth: 1, tickcolor: "darkblue" },
-            bar: { color: "#3498db" },
-            bgcolor: "white",
-            borderwidth: 2,
-            bordercolor: "gray",
-            steps: [
-                { range: [3, 6.5], color: "#e74c3c" },
-                { range: [6.5, 7], color: "#2ecc71" },
-                { range: [7, 9.5], color: "#e67e22" }
-            ],
-            threshold: {
-                line: { color: "red", width: 4 },
-                thickness: 0.75,
-                value: phValue
-            }
-        }
-    };
+    const phBullet = createBulletChart(
+        phValue, 
+        idealValues.pH, 
+        [3, 9.5], 
+        [
+            { min: 3, max: 6.5, color: "#e74c3c" },  // Poor (red)
+            { min: 6.5, max: 7, color: "#2ecc71" },  // Good (green)
+            { min: 7, max: 9.5, color: "#f39c12" }   // Warning (orange)
+        ],
+        'pH Level'
+    );
     
-    // Temperature Gauge
+    // Temperature Bullet Chart
     const tempValue = parseFloat(data.temperature);
-    const tempGauge = {
-        type: 'indicator',
-        mode: 'gauge+number',
-        value: tempValue,
-        title: { text: 'Temperature (°C)', font: { size: 24 } },
-        gauge: {
-            axis: { range: [34, 90], tickwidth: 1, tickcolor: "darkblue" },
-            bar: { color: "#e74c3c" },
-            bgcolor: "white",
-            borderwidth: 2,
-            bordercolor: "gray",
-            steps: [
-                { range: [34, 40], color: "#2ecc71" },
-                { range: [40, 60], color: "#f39c12" },
-                { range: [60, 90], color: "#e74c3c" }
-            ],
-            threshold: {
-                line: { color: "red", width: 4 },
-                thickness: 0.75,
-                value: tempValue
-            }
-        }
-    };
+    const tempBullet = createBulletChart(
+        tempValue, 
+        idealValues.temperature, 
+        [34, 90], 
+        [
+            { min: 34, max: 40, color: "#2ecc71" },  // Good (green)
+            { min: 40, max: 60, color: "#f39c12" },  // Warning (orange)
+            { min: 60, max: 90, color: "#e74c3c" }   // Poor (red)
+        ],
+        'Temperature (°C)'
+    );
     
-    // Color Gauge
+    // Color Bullet Chart
     const colorValue = parseFloat(data.colour);
-    const colorGauge = {
-        type: 'indicator',
-        mode: 'gauge+number',
-        value: colorValue,
-        title: { text: 'Color Value', font: { size: 24 } },
-        gauge: {
-            axis: { range: [240, 255], tickwidth: 1, tickcolor: "darkblue" },
-            bar: { color: "#9b59b6" },
-            bgcolor: "white",
-            borderwidth: 2,
-            bordercolor: "gray",
-            steps: [
-                { range: [240, 245], color: "#e74c3c" },
-                { range: [245, 250], color: "#f39c12" },
-                { range: [250, 255], color: "#2ecc71" }
-            ],
-            threshold: {
-                line: { color: "red", width: 4 },
-                thickness: 0.75,
-                value: colorValue
-            }
-        }
-    };
+    const colorBullet = createBulletChart(
+        colorValue, 
+        idealValues.colour, 
+        [240, 255], 
+        [
+            { min: 240, max: 245, color: "#e74c3c" },  // Poor (red)
+            { min: 245, max: 250, color: "#f39c12" },  // Warning (orange)
+            { min: 250, max: 255, color: "#2ecc71" }   // Good (green)
+        ],
+        'Color Value'
+    );
     
     // Create layout with proper sizing and margins
-    const gaugeLayout = {
+    const bulletLayout = {
         autosize: true,
-        height: 300,
-        margin: { t: 60, r: 30, l: 30, b: 30 },
+        height: 150,
+        margin: { t: 50, r: 30, l: 100, b: 30 },
         paper_bgcolor: 'rgba(0,0,0,0)',
         font: { color: "#2c3e50", family: "Roboto" }
     };
     
-    // Render the gauges with responsive config
+    // Render the bullet charts with responsive config
     const config = {
         responsive: true,
         displayModeBar: false // Hide the modebar for cleaner look
     };
     
-    Plotly.newPlot('ph-gauge', [phGauge], gaugeLayout, config);
-    Plotly.newPlot('temperature-gauge', [tempGauge], gaugeLayout, config);
-    Plotly.newPlot('color-gauge', [colorGauge], gaugeLayout, config);
+    Plotly.newPlot('ph-gauge', phBullet.data, bulletLayout, config);
+    Plotly.newPlot('temperature-gauge', tempBullet.data, bulletLayout, config);
+    Plotly.newPlot('color-gauge', colorBullet.data, bulletLayout, config);
     
     // Force a window resize event to make sure Plotly adjusts the charts
     window.dispatchEvent(new Event('resize'));
 }
 
-// Function to create radar chart
-function createRadarChart(data) {
-    const radarData = [{
-        type: 'scatterpolar',
-        r: [
-            parseFloat(data.pH) / 9.5 * 100,
-            parseFloat(data.temperature) / 90 * 100,
-            data.taste === '1' ? 100 : 0,
-            data.odor === '1' ? 100 : 0,
-            data.fat === '1' ? 100 : 0,
-            data.turbidity === '1' ? 0 : 100,
-            (parseFloat(data.colour) - 240) / 15 * 100
-        ],
-        theta: ['pH', 'Temperature', 'Taste', 'Odor', 'Fat Content', 'Turbidity', 'Color'],
-        fill: 'toself',
-        name: 'Milk Quality Factors',
-        line: {
-            color: '#3498db'
-        },
-        fillcolor: 'rgba(52, 152, 219, 0.5)'
-    }];
+// Helper function to create a bullet chart
+function createBulletChart(value, idealValue, range, zones, title) {
+    const data = [];
     
-    const radarLayout = {
-        autosize: true,
-        height: 400,
-        polar: {
-            radialaxis: {
-                visible: true,
-                range: [0, 100]
-            }
+    // Add colored zones
+    for (const zone of zones) {
+        data.push({
+            type: 'bar',
+            orientation: 'h',
+            y: [title],
+            x: [zone.max - zone.min],
+            base: zone.min,
+            marker: {
+                color: zone.color,
+                opacity: 0.5
+            },
+            width: 0.5,
+            showlegend: false,
+            hoverinfo: 'none'
+        });
+    }
+    
+    // Add ideal value marker
+    data.push({
+        type: 'scatter',
+        x: [idealValue],
+        y: [title],
+        mode: 'markers',
+        marker: {
+            symbol: 'line-ns',
+            color: 'black',
+            size: 16,
+            line: { width: 2 }
         },
-        title: 'Milk Quality Factors',
-        showlegend: false,
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        font: { color: "#2c3e50", family: "Roboto" }
+        name: 'Ideal Value',
+        hovertemplate: 'Ideal: %{x:.1f}<extra></extra>'
+    });
+    
+    // Add actual value marker
+    data.push({
+        type: 'scatter',
+        x: [value],
+        y: [title],
+        mode: 'markers',
+        marker: {
+            color: '#3498db',
+            size: 12,
+            line: { width: 1, color: 'white' }
+        },
+        name: 'Current Value',
+        hovertemplate: 'Current: %{x:.1f}<extra></extra>'
+    });
+    
+    // Add annotation for current value
+    const layout = {
+        annotations: [{
+            x: value,
+            y: title,
+            text: value.toFixed(1),
+            showarrow: true,
+            arrowhead: 0,
+            ax: 0,
+            ay: -30,
+            font: { size: 12, color: "#2c3e50" }
+        }],
+        xaxis: {
+            range: range,
+            showgrid: true,
+            gridcolor: 'rgba(0,0,0,0.1)'
+        },
+        yaxis: {
+            showticklabels: false
+        },
+        showlegend: true,
+        legend: {
+            orientation: 'h',
+            yanchor: 'bottom',
+            y: 1.02,
+            xanchor: 'right',
+            x: 1
+        }
     };
     
-    const config = {
-        responsive: true,
-        displayModeBar: false
-    };
-    
-    Plotly.newPlot('radar-chart', radarData, radarLayout, config);
+    return { data, layout };
 }
 
-// Function to create comparison chart
-function createComparisonChart(data) {
-    const comparisonData = [
+// Function to create parallel coordinates plot (replacing radar chart)
+function createRadarChart(data) {
+    // Define ideal values
+    const idealValues = {
+        'pH': 6.8,
+        'temperature': 37.0,
+        'colour': 253.0,
+        'taste': 1,
+        'odor': 1,
+        'fat': 1,
+        'turbidity': 0
+    };
+    
+    // Define ranges for each parameter
+    const ranges = {
+        'pH': [3, 9.5],
+        'temperature': [34, 90],
+        'colour': [240, 255],
+        'taste': [0, 1],
+        'odor': [0, 1],
+        'fat': [0, 1],
+        'turbidity': [0, 1]
+    };
+    
+    // Create dimensions array for parallel coordinates
+    const dimensions = [
         {
-            x: ['pH', 'Temperature', 'Color'],
-            y: [parseFloat(data.pH), parseFloat(data.temperature), parseFloat(data.colour)],
-            type: 'bar',
-            name: 'Your Sample',
-            marker: {
-                color: '#3498db'
-            }
+            label: 'pH',
+            values: [parseFloat(data.pH), idealValues.pH],
+            range: ranges.pH,
+            tickvals: [3, 6.5, 7, 9.5],
+            ticktext: ['3 (Poor)', '6.5 (Good)', '7 (Good)', '9.5 (Poor)']
         },
         {
-            x: ['pH', 'Temperature', 'Color'],
-            y: [6.8, 37, 253],
-            type: 'bar',
-            name: 'Ideal Values',
-            marker: {
-                color: '#2ecc71'
-            }
+            label: 'Temperature (°C)',
+            values: [parseFloat(data.temperature), idealValues.temperature],
+            range: ranges.temperature,
+            tickvals: [34, 40, 60, 90],
+            ticktext: ['34 (Good)', '40 (Good)', '60 (Warning)', '90 (Poor)']
+        },
+        {
+            label: 'Color Value',
+            values: [parseFloat(data.colour), idealValues.colour],
+            range: ranges.colour,
+            tickvals: [240, 245, 250, 255],
+            ticktext: ['240 (Poor)', '245 (Poor)', '250 (Warning)', '255 (Good)']
+        },
+        {
+            label: 'Taste',
+            values: [parseInt(data.taste), idealValues.taste],
+            range: ranges.taste,
+            tickvals: [0, 1],
+            ticktext: ['Bad', 'Good']
+        },
+        {
+            label: 'Odor',
+            values: [parseInt(data.odor), idealValues.odor],
+            range: ranges.odor,
+            tickvals: [0, 1],
+            ticktext: ['Bad', 'Good']
+        },
+        {
+            label: 'Fat Content',
+            values: [parseInt(data.fat), idealValues.fat],
+            range: ranges.fat,
+            tickvals: [0, 1],
+            ticktext: ['Low', 'Good']
+        },
+        {
+            label: 'Turbidity',
+            values: [parseInt(data.turbidity), idealValues.turbidity],
+            range: ranges.turbidity,
+            tickvals: [0, 1],
+            ticktext: ['Good', 'Bad']
         }
     ];
     
-    const comparisonLayout = {
-        autosize: true,
-        height: 400,
-        title: 'Your Sample vs. Ideal Values',
-        barmode: 'group',
+    // Create parallel coordinates plot
+    const parallelData = [{
+        type: 'parcoords',
+        line: {
+            color: [0, 1],
+            colorscale: [[0, '#3498db'], [1, '#2ecc71']],
+            showscale: true,
+            colorbar: {
+                title: 'Sample',
+                tickvals: [0, 1],
+                ticktext: ['Current', 'Ideal']
+            }
+        },
+        dimensions: dimensions
+    }];
+    
+    const parallelLayout = {
+        title: 'Milk Quality Factors Comparison',
+        height: 500,
+        margin: { l: 80, r: 80, t: 80, b: 40 },
         paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)',
         font: { color: "#2c3e50", family: "Roboto" }
     };
     
@@ -325,7 +405,116 @@ function createComparisonChart(data) {
         displayModeBar: false
     };
     
-    Plotly.newPlot('comparison-chart', comparisonData, comparisonLayout, config);
+    Plotly.newPlot('radar-chart', parallelData, parallelLayout, config);
+}
+
+// Function to create diverging bar chart (replacing comparison chart)
+function createComparisonChart(data) {
+    // Define ideal values
+    const idealValues = {
+        'pH': 6.8,
+        'temperature': 37.0,
+        'colour': 253.0
+    };
+    
+    // Calculate differences from ideal values
+    const params = ['pH', 'Temperature', 'Color'];
+    const currentValues = [
+        parseFloat(data.pH),
+        parseFloat(data.temperature),
+        parseFloat(data.colour)
+    ];
+    const idealValuesArray = [
+        idealValues.pH,
+        idealValues.temperature,
+        idealValues.colour
+    ];
+    
+    // Calculate differences
+    const differences = currentValues.map((val, i) => val - idealValuesArray[i]);
+    
+    // Determine colors based on difference magnitude
+    const colors = differences.map(diff => {
+        const absDiff = Math.abs(diff);
+        const threshold = Math.abs(idealValuesArray[0]) * 0.1; // 10% of ideal value as threshold
+        
+        if (absDiff < threshold * 0.5) {
+            return "#2ecc71"; // Good (green)
+        } else if (absDiff < threshold) {
+            return "#f39c12"; // Warning (orange)
+        } else {
+            return "#e74c3c"; // Poor (red)
+        }
+    });
+    
+    // Create hover text
+    const hoverText = differences.map((diff, i) => {
+        return `Parameter: ${params[i]}<br>` +
+               `Current: ${currentValues[i].toFixed(1)}<br>` +
+               `Ideal: ${idealValuesArray[i].toFixed(1)}<br>` +
+               `Difference: ${diff > 0 ? '+' : ''}${diff.toFixed(1)}`;
+    });
+    
+    // Create diverging bar chart
+    const divergingData = [{
+        type: 'bar',
+        x: params,
+        y: differences,
+        marker: {
+            color: colors
+        },
+        text: hoverText,
+        hoverinfo: 'text'
+    }];
+    
+    // Add zero line and annotations
+    const divergingLayout = {
+        title: 'Difference from Ideal Values',
+        height: 400,
+        margin: { t: 80, r: 30, l: 50, b: 50 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: "#2c3e50", family: "Roboto" },
+        xaxis: {
+            title: null,
+            showgrid: false
+        },
+        yaxis: {
+            title: 'Difference from Ideal',
+            zeroline: true,
+            zerolinecolor: 'black',
+            zerolinewidth: 2,
+            gridcolor: 'rgba(0,0,0,0.1)'
+        },
+        shapes: [{
+            type: 'line',
+            x0: -0.5,
+            x1: params.length - 0.5,
+            y0: 0,
+            y1: 0,
+            line: {
+                color: 'black',
+                width: 2,
+                dash: 'dot'
+            }
+        }],
+        annotations: differences.map((diff, i) => ({
+            x: params[i],
+            y: diff,
+            text: diff > 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1),
+            showarrow: true,
+            arrowhead: 0,
+            ax: 0,
+            ay: diff > 0 ? -20 : 20
+        }))
+    };
+    
+    const config = {
+        responsive: true,
+        displayModeBar: false
+    };
+    
+    Plotly.newPlot('comparison-chart', divergingData, divergingLayout, config);
 }
 
 function generateRecommendations(data, prediction) {

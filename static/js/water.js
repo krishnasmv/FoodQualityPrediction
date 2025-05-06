@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const predictionForm = document.getElementById('waterPredictionForm');
+    const predictionForm = document.getElementById('predictionForm');
     const viewMoreBtn = document.getElementById('view-more-btn');
     const viewMoreContainer = document.getElementById('view-more-container');
     
@@ -76,20 +76,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 let alertClass = 'alert-success';
                 let qualityClass = 'quality-high';
                 
-                if (predResult.prediction.toLowerCase() === 'bad') {
+                if (predResult.prediction === 0) {
                     alertClass = 'alert-danger';
                     qualityClass = 'quality-low';
                     predResult.prediction = 'Not Potable';
-                } else if (predResult.prediction.toLowerCase() === 'good') {
-                    alertClass = 'alert-success';
-                    qualityClass = 'quality-high';
-                    predResult.prediction = 'Potable';
                 } else {
-                    predResult.prediction = 'Unknown';
+                    predResult.prediction = 'Potable';
                 }
                 
                 output.className = `alert ${alertClass}`;
-                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${predResult.prediction}</span>`;
+                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${predResult.prediction}</span> (Confidence: ${(predResult.confidence * 100).toFixed(2)}%)`;
                 
                 // Store the form data for later use
                 window.waterData = data;
@@ -143,186 +139,282 @@ function createVisualizations(data) {
     generateRecommendations(data);
 }
 
-// Function to create gauge charts
+// Function to create bullet charts (replacing gauge charts)
 function createGaugeCharts(data) {
-    // pH Gauge
+    // Define ideal values
+    const idealValues = {
+        'ph': 7.0,
+        'turbidity': 1.0,
+        'solids': 500
+    };
+    
+    // pH Bullet Chart
     const phValue = parseFloat(data.ph);
-    const phGauge = {
-        type: 'indicator',
-        mode: 'gauge+number',
-        value: phValue,
-        title: { text: 'pH Level', font: { size: 24 } },
-        gauge: {
-            axis: { range: [0, 14], tickwidth: 1, tickcolor: "darkblue" },
-            bar: { color: "#3498db" },
-            bgcolor: "white",
-            borderwidth: 2,
-            bordercolor: "gray",
-            steps: [
-                { range: [0, 6.5], color: "#e74c3c" },
-                { range: [6.5, 8.5], color: "#2ecc71" },
-                { range: [8.5, 14], color: "#e67e22" }
-            ],
-            threshold: {
-                line: { color: "red", width: 4 },
-                thickness: 0.75,
-                value: phValue
-            }
-        }
-    };
+    const phBullet = createBulletChart(
+        phValue, 
+        idealValues.ph, 
+        [0, 14], 
+        [
+            { min: 0, max: 6.5, color: "#e74c3c" },  // Poor (red)
+            { min: 6.5, max: 8.5, color: "#2ecc71" }, // Good (green)
+            { min: 8.5, max: 14, color: "#f39c12" }  // Warning (orange)
+        ],
+        'pH Level'
+    );
     
-    // Turbidity Gauge
+    // Turbidity Bullet Chart
     const turbidityValue = parseFloat(data.turbidity);
-    const turbidityGauge = {
-        type: 'indicator',
-        mode: 'gauge+number',
-        value: turbidityValue,
-        title: { text: 'Turbidity (NTU)', font: { size: 24 } },
-        gauge: {
-            axis: { range: [0, 10], tickwidth: 1, tickcolor: "darkblue" },
-            bar: { color: "#e74c3c" },
-            bgcolor: "white",
-            borderwidth: 2,
-            bordercolor: "gray",
-            steps: [
-                { range: [0, 1], color: "#2ecc71" },
-                { range: [1, 5], color: "#f39c12" },
-                { range: [5, 10], color: "#e74c3c" }
-            ],
-            threshold: {
-                line: { color: "red", width: 4 },
-                thickness: 0.75,
-                value: turbidityValue
-            }
-        }
-    };
+    const turbidityBullet = createBulletChart(
+        turbidityValue, 
+        idealValues.turbidity, 
+        [0, 10], 
+        [
+            { min: 0, max: 1, color: "#2ecc71" },  // Good (green)
+            { min: 1, max: 5, color: "#f39c12" },  // Warning (orange)
+            { min: 5, max: 10, color: "#e74c3c" }  // Poor (red)
+        ],
+        'Turbidity (NTU)'
+    );
     
-    // Solids Gauge
+    // Solids Bullet Chart
     const solidsValue = parseFloat(data.solids);
-    const solidsGauge = {
-        type: 'indicator',
-        mode: 'gauge+number',
-        value: solidsValue,
-        title: { text: 'Solids (ppm)', font: { size: 24 } },
-        gauge: {
-            axis: { range: [0, 60000], tickwidth: 1, tickcolor: "darkblue" },
-            bar: { color: "#9b59b6" },
-            bgcolor: "white",
-            borderwidth: 2,
-            bordercolor: "gray",
-            steps: [
-                { range: [0, 500], color: "#2ecc71" },
-                { range: [500, 1500], color: "#f39c12" },
-                { range: [1500, 60000], color: "#e74c3c" }
-            ],
-            threshold: {
-                line: { color: "red", width: 4 },
-                thickness: 0.75,
-                value: solidsValue
-            }
-        }
-    };
+    const solidsBullet = createBulletChart(
+        solidsValue, 
+        idealValues.solids, 
+        [0, 60000], 
+        [
+            { min: 0, max: 500, color: "#2ecc71" },    // Good (green)
+            { min: 500, max: 1500, color: "#f39c12" }, // Warning (orange)
+            { min: 1500, max: 60000, color: "#e74c3c" } // Poor (red)
+        ],
+        'Solids (ppm)'
+    );
     
     // Create layout with proper sizing and margins
-    const gaugeLayout = {
+    const bulletLayout = {
         autosize: true,
-        height: 300,
-        margin: { t: 60, r: 30, l: 30, b: 30 },
+        height: 150,
+        margin: { t: 50, r: 30, l: 100, b: 30 },
         paper_bgcolor: 'rgba(0,0,0,0)',
         font: { color: "#2c3e50", family: "Roboto" }
     };
     
-    // Render the gauges with responsive config
+    // Render the bullet charts with responsive config
     const config = {
         responsive: true,
         displayModeBar: false // Hide the modebar for cleaner look
     };
     
-    Plotly.newPlot('ph-gauge', [phGauge], gaugeLayout, config);
-    Plotly.newPlot('turbidity-gauge', [turbidityGauge], gaugeLayout, config);
-    Plotly.newPlot('solids-gauge', [solidsGauge], gaugeLayout, config);
+    Plotly.newPlot('ph-gauge', phBullet.data, bulletLayout, config);
+    Plotly.newPlot('turbidity-gauge', turbidityBullet.data, bulletLayout, config);
+    Plotly.newPlot('solids-gauge', solidsBullet.data, bulletLayout, config);
     
     // Force a window resize event to make sure Plotly adjusts the charts
     window.dispatchEvent(new Event('resize'));
 }
 
-// Function to create radar chart
-function createRadarChart(data) {
-    const radarData = [{
-        type: 'scatterpolar',
-        r: [
-            parseFloat(data.ph) / 14 * 100,
-            parseFloat(data.hardness) / 500 * 100,
-            parseFloat(data.solids) / 60000 * 100,
-            parseFloat(data.chloramines) / 15 * 100,
-            parseFloat(data.sulfate) / 500 * 100,
-            parseFloat(data.conductivity) / 1000 * 100,
-            parseFloat(data.organic_carbon) / 30 * 100,
-            parseFloat(data.trihalomethanes) / 150 * 100,
-            (10 - parseFloat(data.turbidity)) / 10 * 100 // Inverted so lower is better
-        ],
-        theta: ['pH', 'Hardness', 'Solids', 'Chloramines', 'Sulfate', 'Conductivity', 'Organic Carbon', 'Trihalomethanes', 'Clarity'],
-        fill: 'toself',
-        name: 'Water Quality Factors',
-        line: {
-            color: '#3498db'
-        },
-        fillcolor: 'rgba(52, 152, 219, 0.5)'
-    }];
+// Helper function to create a bullet chart
+function createBulletChart(value, idealValue, range, zones, title) {
+    const data = [];
     
-    const radarLayout = {
-        autosize: true,
-        height: 400,
-        polar: {
-            radialaxis: {
-                visible: true,
-                range: [0, 100]
-            }
+    // Add colored zones
+    for (const zone of zones) {
+        data.push({
+            type: 'bar',
+            orientation: 'h',
+            y: [title],
+            x: [zone.max - zone.min],
+            base: zone.min,
+            marker: {
+                color: zone.color,
+                opacity: 0.5
+            },
+            width: 0.5,
+            showlegend: false,
+            hoverinfo: 'none'
+        });
+    }
+    
+    // Add ideal value marker
+    data.push({
+        type: 'scatter',
+        x: [idealValue],
+        y: [title],
+        mode: 'markers',
+        marker: {
+            symbol: 'line-ns',
+            color: 'black',
+            size: 16,
+            line: { width: 2 }
         },
-        title: 'Water Quality Factors',
-        showlegend: false,
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        font: { color: "#2c3e50", family: "Roboto" }
+        name: 'Ideal Value',
+        hovertemplate: 'Ideal: %{x:.1f}<extra></extra>'
+    });
+    
+    // Add actual value marker
+    data.push({
+        type: 'scatter',
+        x: [value],
+        y: [title],
+        mode: 'markers',
+        marker: {
+            color: '#3498db',
+            size: 12,
+            line: { width: 1, color: 'white' }
+        },
+        name: 'Current Value',
+        hovertemplate: 'Current: %{x:.1f}<extra></extra>'
+    });
+    
+    // Add annotation for current value
+    const layout = {
+        annotations: [{
+            x: value,
+            y: title,
+            text: value.toFixed(1),
+            showarrow: true,
+            arrowhead: 0,
+            ax: 0,
+            ay: -30,
+            font: { size: 12, color: "#2c3e50" }
+        }],
+        xaxis: {
+            range: range,
+            showgrid: true,
+            gridcolor: 'rgba(0,0,0,0.1)'
+        },
+        yaxis: {
+            showticklabels: false
+        },
+        showlegend: true,
+        legend: {
+            orientation: 'h',
+            yanchor: 'bottom',
+            y: 1.02,
+            xanchor: 'right',
+            x: 1
+        }
     };
     
-    const config = {
-        responsive: true,
-        displayModeBar: false
-    };
-    
-    Plotly.newPlot('radar-chart', radarData, radarLayout, config);
+    return { data, layout };
 }
 
-// Function to create comparison chart
-function createComparisonChart(data) {
-    const comparisonData = [
+// Function to create parallel coordinates plot (replacing radar chart)
+function createRadarChart(data) {
+    // Define ideal values
+    const idealValues = {
+        'ph': 7.0,
+        'hardness': 150,
+        'solids': 500,
+        'chloramines': 4.0,
+        'sulfate': 250,
+        'conductivity': 800,
+        'organic_carbon': 2.0,
+        'trihalomethanes': 80,
+        'turbidity': 1.0
+    };
+    
+    // Define ranges for each parameter
+    const ranges = {
+        'ph': [0, 14],
+        'hardness': [0, 500],
+        'solids': [0, 60000],
+        'chloramines': [0, 15],
+        'sulfate': [0, 500],
+        'conductivity': [0, 1000],
+        'organic_carbon': [0, 30],
+        'trihalomethanes': [0, 150],
+        'turbidity': [0, 10]
+    };
+    
+    // Create dimensions array for parallel coordinates
+    const dimensions = [
         {
-            x: ['pH', 'Turbidity', 'Hardness'],
-            y: [parseFloat(data.ph), parseFloat(data.turbidity), parseFloat(data.hardness)],
-            type: 'bar',
-            name: 'Your Sample',
-            marker: {
-                color: '#3498db'
-            }
+            label: 'pH',
+            values: [parseFloat(data.ph), idealValues.ph],
+            range: ranges.ph,
+            tickvals: [0, 6.5, 7, 8.5, 14],
+            ticktext: ['0 (Poor)', '6.5 (Good)', '7 (Good)', '8.5 (Good)', '14 (Poor)']
         },
         {
-            x: ['pH', 'Turbidity', 'Hardness'],
-            y: [7.0, 1.0, 150],
-            type: 'bar',
-            name: 'Ideal Values',
-            marker: {
-                color: '#2ecc71'
-            }
+            label: 'Hardness',
+            values: [parseFloat(data.hardness), idealValues.hardness],
+            range: ranges.hardness,
+            tickvals: [0, 150, 300, 500],
+            ticktext: ['0 (Poor)', '150 (Good)', '300 (Warning)', '500 (Poor)']
+        },
+        {
+            label: 'Solids (ppm)',
+            values: [parseFloat(data.solids), idealValues.solids],
+            range: ranges.solids,
+            tickvals: [0, 500, 1500, 60000],
+            ticktext: ['0 (Poor)', '500 (Good)', '1500 (Warning)', '60000 (Poor)']
+        },
+        {
+            label: 'Chloramines',
+            values: [parseFloat(data.chloramines), idealValues.chloramines],
+            range: ranges.chloramines,
+            tickvals: [0, 4, 15],
+            ticktext: ['0 (Good)', '4 (Good)', '15 (Poor)']
+        },
+        {
+            label: 'Sulfate',
+            values: [parseFloat(data.sulfate), idealValues.sulfate],
+            range: ranges.sulfate,
+            tickvals: [0, 250, 500],
+            ticktext: ['0 (Good)', '250 (Good)', '500 (Poor)']
+        },
+        {
+            label: 'Conductivity',
+            values: [parseFloat(data.conductivity), idealValues.conductivity],
+            range: ranges.conductivity,
+            tickvals: [0, 800, 1000],
+            ticktext: ['0 (Good)', '800 (Good)', '1000 (Poor)']
+        },
+        {
+            label: 'Organic Carbon',
+            values: [parseFloat(data.organic_carbon), idealValues.organic_carbon],
+            range: ranges.organic_carbon,
+            tickvals: [0, 2, 30],
+            ticktext: ['0 (Good)', '2 (Good)', '30 (Poor)']
+        },
+        {
+            label: 'Trihalomethanes',
+            values: [parseFloat(data.trihalomethanes), idealValues.trihalomethanes],
+            range: ranges.trihalomethanes,
+            tickvals: [0, 80, 150],
+            ticktext: ['0 (Good)', '80 (Good)', '150 (Poor)']
+        },
+        {
+            label: 'Turbidity',
+            values: [parseFloat(data.turbidity), idealValues.turbidity],
+            range: ranges.turbidity,
+            tickvals: [0, 1, 5, 10],
+            ticktext: ['0 (Good)', '1 (Good)', '5 (Warning)', '10 (Poor)']
         }
     ];
     
-    const comparisonLayout = {
-        autosize: true,
-        height: 400,
-        title: 'Your Sample vs. Ideal Values',
-        barmode: 'group',
+    // Create parallel coordinates plot
+    const parallelData = [{
+        type: 'parcoords',
+        line: {
+            color: [0, 1],
+            colorscale: [[0, '#3498db'], [1, '#2ecc71']],
+            showscale: true,
+            colorbar: {
+                title: 'Sample',
+                tickvals: [0, 1],
+                ticktext: ['Current', 'Ideal']
+            }
+        },
+        dimensions: dimensions
+    }];
+    
+    const parallelLayout = {
+        title: 'Water Quality Factors Comparison',
+        height: 500,
+        margin: { l: 80, r: 80, t: 80, b: 40 },
         paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)',
         font: { color: "#2c3e50", family: "Roboto" }
     };
     
@@ -331,7 +423,116 @@ function createComparisonChart(data) {
         displayModeBar: false
     };
     
-    Plotly.newPlot('comparison-chart', comparisonData, comparisonLayout, config);
+    Plotly.newPlot('radar-chart', parallelData, parallelLayout, config);
+}
+
+// Function to create diverging bar chart (replacing comparison chart)
+function createComparisonChart(data) {
+    // Define ideal values
+    const idealValues = {
+        'ph': 7.0,
+        'turbidity': 1.0,
+        'hardness': 150
+    };
+    
+    // Calculate differences from ideal values
+    const params = ['pH', 'Turbidity', 'Hardness'];
+    const currentValues = [
+        parseFloat(data.ph),
+        parseFloat(data.turbidity),
+        parseFloat(data.hardness)
+    ];
+    const idealValuesArray = [
+        idealValues.ph,
+        idealValues.turbidity,
+        idealValues.hardness
+    ];
+    
+    // Calculate differences
+    const differences = currentValues.map((val, i) => val - idealValuesArray[i]);
+    
+    // Determine colors based on difference magnitude
+    const colors = differences.map(diff => {
+        const absDiff = Math.abs(diff);
+        const threshold = Math.abs(idealValuesArray[0]) * 0.1; // 10% of ideal value as threshold
+        
+        if (absDiff < threshold * 0.5) {
+            return "#2ecc71"; // Good (green)
+        } else if (absDiff < threshold) {
+            return "#f39c12"; // Warning (orange)
+        } else {
+            return "#e74c3c"; // Poor (red)
+        }
+    });
+    
+    // Create hover text
+    const hoverText = differences.map((diff, i) => {
+        return `Parameter: ${params[i]}<br>` +
+               `Current: ${currentValues[i].toFixed(1)}<br>` +
+               `Ideal: ${idealValuesArray[i].toFixed(1)}<br>` +
+               `Difference: ${diff > 0 ? '+' : ''}${diff.toFixed(1)}`;
+    });
+    
+    // Create diverging bar chart
+    const divergingData = [{
+        type: 'bar',
+        x: params,
+        y: differences,
+        marker: {
+            color: colors
+        },
+        text: hoverText,
+        hoverinfo: 'text'
+    }];
+    
+    // Add zero line and annotations
+    const divergingLayout = {
+        title: 'Difference from Ideal Values',
+        height: 400,
+        margin: { t: 80, r: 30, l: 50, b: 50 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: "#2c3e50", family: "Roboto" },
+        xaxis: {
+            title: null,
+            showgrid: false
+        },
+        yaxis: {
+            title: 'Difference from Ideal',
+            zeroline: true,
+            zerolinecolor: 'black',
+            zerolinewidth: 2,
+            gridcolor: 'rgba(0,0,0,0.1)'
+        },
+        shapes: [{
+            type: 'line',
+            x0: -0.5,
+            x1: params.length - 0.5,
+            y0: 0,
+            y1: 0,
+            line: {
+                color: 'black',
+                width: 2,
+                dash: 'dot'
+            }
+        }],
+        annotations: differences.map((diff, i) => ({
+            x: params[i],
+            y: diff,
+            text: diff > 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1),
+            showarrow: true,
+            arrowhead: 0,
+            ax: 0,
+            ay: diff > 0 ? -20 : 20
+        }))
+    };
+    
+    const config = {
+        responsive: true,
+        displayModeBar: false
+    };
+    
+    Plotly.newPlot('comparison-chart', divergingData, divergingLayout, config);
 }
 
 function generateRecommendations(data) {
