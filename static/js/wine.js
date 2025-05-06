@@ -80,18 +80,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Wine quality is typically rated on a scale of 0-10
                 const quality = predResult.prediction;
                 
-                if (quality <= 4) {
+                if (quality === 'bad' || quality === 'Low') {
                     alertClass = 'alert-danger';
                     qualityClass = 'quality-low';
                     qualityText = 'Low';
-                } else if (quality <= 6) {
+                } else if (quality === 'average' || quality === 'Medium') {
                     alertClass = 'alert-warning';
                     qualityClass = 'quality-medium';
                     qualityText = 'Medium';
+                } else if (quality === 'good' || quality === 'High') {
+                    alertClass = 'alert-success';
+                    qualityClass = 'quality-high';
+                    qualityText = 'High';
+                } else {
+                    alertClass = 'alert-secondary';
+                    qualityClass = 'quality-unknown';
+                    qualityText = quality;
                 }
                 
                 output.className = `alert ${alertClass}`;
-                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${qualityText}</span> (Score: ${quality}/10, Confidence: ${(predResult.confidence * 100).toFixed(2)}%)`;
+                output.innerHTML = `Predicted Quality: <span class="${qualityClass}">${qualityText}</span>`;
                 
                 // Store the form data for later use
                 window.wineData = data;
@@ -109,6 +117,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     viewMoreContainer.style.opacity = '1';
                     viewMoreContainer.style.transform = 'translateY(0)';
                 }, 300);
+                
+                // Display logs from backend
+                if (predResult.logs) {
+                    const logsContainer = document.getElementById('predictionLogs');
+                    if (!logsContainer) {
+                        const newLogsDiv = document.createElement('div');
+                        newLogsDiv.id = 'predictionLogs';
+                        newLogsDiv.style.whiteSpace = 'pre-wrap';
+                        newLogsDiv.style.backgroundColor = '#f8f9fa';
+                        newLogsDiv.style.border = '1px solid #ddd';
+                        newLogsDiv.style.padding = '10px';
+                        newLogsDiv.style.marginTop = '15px';
+                        newLogsDiv.style.maxHeight = '200px';
+                        newLogsDiv.style.overflowY = 'auto';
+                        resultDiv.appendChild(newLogsDiv);
+                    }
+                    document.getElementById('predictionLogs').textContent = predResult.logs;
+                }
                 
             } else {
                 output.className = 'alert alert-danger';
@@ -145,299 +171,158 @@ function createVisualizations(data, predictedQuality) {
     generateRecommendations(data, predictedQuality);
 }
 
-// Function to create bullet charts (replacing gauge charts)
+// Function to create gauge charts
 function createGaugeCharts(data) {
-    // Define ideal values
-    const idealValues = {
-        'alcohol': 12.0,
-        'fixed_acidity': 7.5,
-        'total_sulfur_dioxide': 100
+    // Alcohol Gauge
+    const alcoholValue = parseFloat(data.alcohol);
+    const alcoholGauge = {
+        type: 'indicator',
+        mode: 'gauge+number',
+        value: alcoholValue,
+        title: { text: 'Alcohol (% vol.)', font: { size: 24 } },
+        gauge: {
+            axis: { range: [8, 15], tickwidth: 1, tickcolor: "darkblue" },
+            bar: { color: "#3498db" },
+            bgcolor: "white",
+            borderwidth: 2,
+            bordercolor: "gray",
+            steps: [
+                { range: [8, 10], color: "#e74c3c" },
+                { range: [10, 12], color: "#f39c12" },
+                { range: [12, 15], color: "#2ecc71" }
+            ],
+            threshold: {
+                line: { color: "red", width: 4 },
+                thickness: 0.75,
+                value: alcoholValue
+            }
+        }
     };
     
-    // Alcohol Bullet Chart
-    const alcoholValue = parseFloat(data.alcohol);
-    const alcoholBullet = createBulletChart(
-        alcoholValue, 
-        idealValues.alcohol, 
-        [8, 15], 
-        [
-            { min: 8, max: 10, color: "#e74c3c" },   // Poor (red)
-            { min: 10, max: 12, color: "#f39c12" },  // Warning (orange)
-            { min: 12, max: 15, color: "#2ecc71" }   // Good (green)
-        ],
-        'Alcohol (% vol.)'
-    );
-    
-    // Acidity Bullet Chart
+    // Acidity Gauge (Fixed Acidity)
     const acidityValue = parseFloat(data.fixed_acidity);
-    const acidityBullet = createBulletChart(
-        acidityValue, 
-        idealValues.fixed_acidity, 
-        [3, 15], 
-        [
-            { min: 3, max: 6, color: "#e74c3c" },  // Poor (red)
-            { min: 6, max: 9, color: "#2ecc71" },  // Good (green)
-            { min: 9, max: 15, color: "#f39c12" }  // Warning (orange)
-        ],
-        'Fixed Acidity (g/L)'
-    );
+    const acidityGauge = {
+        type: 'indicator',
+        mode: 'gauge+number',
+        value: acidityValue,
+        title: { text: 'Fixed Acidity (g/L)', font: { size: 24 } },
+        gauge: {
+            axis: { range: [3, 15], tickwidth: 1, tickcolor: "darkblue" },
+            bar: { color: "#e74c3c" },
+            bgcolor: "white",
+            borderwidth: 2,
+            bordercolor: "gray",
+            steps: [
+                { range: [3, 6], color: "#e74c3c" },
+                { range: [6, 9], color: "#2ecc71" },
+                { range: [9, 15], color: "#f39c12" }
+            ],
+            threshold: {
+                line: { color: "red", width: 4 },
+                thickness: 0.75,
+                value: acidityValue
+            }
+        }
+    };
     
-    // Sulfur Dioxide Bullet Chart
+    // Sulfur Dioxide Gauge
     const sulfurValue = parseFloat(data.total_sulfur_dioxide);
-    const sulfurBullet = createBulletChart(
-        sulfurValue, 
-        idealValues.total_sulfur_dioxide, 
-        [0, 300], 
-        [
-            { min: 0, max: 50, color: "#e74c3c" },    // Poor (red)
-            { min: 50, max: 150, color: "#2ecc71" },  // Good (green)
-            { min: 150, max: 300, color: "#f39c12" }  // Warning (orange)
-        ],
-        'Total SO₂ (mg/L)'
-    );
+    const sulfurGauge = {
+        type: 'indicator',
+        mode: 'gauge+number',
+        value: sulfurValue,
+        title: { text: 'Total SO₂ (mg/L)', font: { size: 24 } },
+        gauge: {
+            axis: { range: [0, 300], tickwidth: 1, tickcolor: "darkblue" },
+            bar: { color: "#9b59b6" },
+            bgcolor: "white",
+            borderwidth: 2,
+            bordercolor: "gray",
+            steps: [
+                { range: [0, 50], color: "#e74c3c" },
+                { range: [50, 150], color: "#2ecc71" },
+                { range: [150, 300], color: "#f39c12" }
+            ],
+            threshold: {
+                line: { color: "red", width: 4 },
+                thickness: 0.75,
+                value: sulfurValue
+            }
+        }
+    };
     
     // Create layout with proper sizing and margins
-    const bulletLayout = {
+    const gaugeLayout = {
         autosize: true,
-        height: 150,
-        margin: { t: 50, r: 30, l: 120, b: 30 },
+        height: 300,
+        margin: { t: 60, r: 30, l: 30, b: 30 },
         paper_bgcolor: 'rgba(0,0,0,0)',
         font: { color: "#2c3e50", family: "Roboto" }
     };
     
-    // Render the bullet charts with responsive config
+    // Render the gauges with responsive config
     const config = {
         responsive: true,
         displayModeBar: false // Hide the modebar for cleaner look
     };
     
-    Plotly.newPlot('alcohol-gauge', alcoholBullet.data, bulletLayout, config);
-    Plotly.newPlot('acidity-gauge', acidityBullet.data, bulletLayout, config);
-    Plotly.newPlot('sulfur-gauge', sulfurBullet.data, bulletLayout, config);
+    Plotly.newPlot('alcohol-gauge', [alcoholGauge], gaugeLayout, config);
+    Plotly.newPlot('acidity-gauge', [acidityGauge], gaugeLayout, config);
+    Plotly.newPlot('sulfur-gauge', [sulfurGauge], gaugeLayout, config);
     
     // Force a window resize event to make sure Plotly adjusts the charts
     window.dispatchEvent(new Event('resize'));
 }
 
-// Helper function to create a bullet chart
-function createBulletChart(value, idealValue, range, zones, title) {
-    const data = [];
-    
-    // Add colored zones
-    for (const zone of zones) {
-        data.push({
-            type: 'bar',
-            orientation: 'h',
-            y: [title],
-            x: [zone.max - zone.min],
-            base: zone.min,
-            marker: {
-                color: zone.color,
-                opacity: 0.5
-            },
-            width: 0.5,
-            showlegend: false,
-            hoverinfo: 'none'
-        });
-    }
-    
-    // Add ideal value marker
-    data.push({
-        type: 'scatter',
-        x: [idealValue],
-        y: [title],
-        mode: 'markers',
-        marker: {
-            symbol: 'line-ns',
-            color: 'black',
-            size: 16,
-            line: { width: 2 }
-        },
-        name: 'Ideal Value',
-        hovertemplate: 'Ideal: %{x:.1f}<extra></extra>'
-    });
-    
-    // Add actual value marker
-    data.push({
-        type: 'scatter',
-        x: [value],
-        y: [title],
-        mode: 'markers',
-        marker: {
-            color: '#8e44ad',
-            size: 12,
-            line: { width: 1, color: 'white' }
-        },
-        name: 'Current Value',
-        hovertemplate: 'Current: %{x:.1f}<extra></extra>'
-    });
-    
-    // Add annotation for current value
-    const layout = {
-        annotations: [{
-            x: value,
-            y: title,
-            text: value.toFixed(1),
-            showarrow: true,
-            arrowhead: 0,
-            ax: 0,
-            ay: -30,
-            font: { size: 12, color: "#2c3e50" }
-        }],
-        xaxis: {
-            range: range,
-            showgrid: true,
-            gridcolor: 'rgba(0,0,0,0.1)'
-        },
-        yaxis: {
-            showticklabels: false
-        },
-        showlegend: true,
-        legend: {
-            orientation: 'h',
-            yanchor: 'bottom',
-            y: 1.02,
-            xanchor: 'right',
-            x: 1
-        }
-    };
-    
-    return { data, layout };
-}
-
-// Function to create parallel coordinates plot (replacing radar chart)
+// Function to create radar chart
 function createRadarChart(data) {
-    // Define ideal values
-    const idealValues = {
-        'fixed_acidity': 7.5,
-        'volatile_acidity': 0.4,
-        'citric_acid': 0.5,
-        'residual_sugar': 2.5,
-        'chlorides': 0.05,
-        'free_sulfur_dioxide': 30,
-        'total_sulfur_dioxide': 100,
-        'density': 0.995,
-        'ph': 3.3,
-        'sulphates': 0.8,
-        'alcohol': 12.0
-    };
-    
-    // Define ranges for each parameter
-    const ranges = {
-        'fixed_acidity': [3, 15],
-        'volatile_acidity': [0, 1.5],
-        'citric_acid': [0, 1],
-        'residual_sugar': [0, 20],
-        'chlorides': [0, 0.5],
-        'free_sulfur_dioxide': [0, 100],
-        'total_sulfur_dioxide': [0, 300],
-        'density': [0.9, 1.1],
-        'ph': [2.5, 4.5],
-        'sulphates': [0, 2],
-        'alcohol': [8, 15]
-    };
-    
-    // Create dimensions array for parallel coordinates
-    const dimensions = [
-        {
-            label: 'Fixed Acidity (g/L)',
-            values: [parseFloat(data.fixed_acidity), idealValues.fixed_acidity],
-            range: ranges.fixed_acidity,
-            tickvals: [3, 6, 7.5, 9, 15],
-            ticktext: ['3 (Poor)', '6 (Good)', '7.5 (Ideal)', '9 (Good)', '15 (Poor)']
-        },
-        {
-            label: 'Volatile Acidity (g/L)',
-            values: [parseFloat(data.volatile_acidity), idealValues.volatile_acidity],
-            range: ranges.volatile_acidity,
-            tickvals: [0, 0.4, 0.7, 1.5],
-            ticktext: ['0 (Good)', '0.4 (Ideal)', '0.7 (Warning)', '1.5 (Poor)']
-        },
-        {
-            label: 'Citric Acid (g/L)',
-            values: [parseFloat(data.citric_acid), idealValues.citric_acid],
-            range: ranges.citric_acid,
-            tickvals: [0, 0.5, 1],
-            ticktext: ['0 (Poor)', '0.5 (Ideal)', '1 (Good)']
-        },
-        {
-            label: 'Residual Sugar (g/L)',
-            values: [parseFloat(data.residual_sugar), idealValues.residual_sugar],
-            range: ranges.residual_sugar,
-            tickvals: [0, 2.5, 10, 20],
-            ticktext: ['0 (Poor)', '2.5 (Ideal)', '10 (Warning)', '20 (Poor)']
-        },
-        {
-            label: 'Chlorides (g/L)',
-            values: [parseFloat(data.chlorides), idealValues.chlorides],
-            range: ranges.chlorides,
-            tickvals: [0, 0.05, 0.1, 0.5],
-            ticktext: ['0 (Good)', '0.05 (Ideal)', '0.1 (Warning)', '0.5 (Poor)']
-        },
-        {
-            label: 'Free SO₂ (mg/L)',
-            values: [parseFloat(data.free_sulfur_dioxide), idealValues.free_sulfur_dioxide],
-            range: ranges.free_sulfur_dioxide,
-            tickvals: [0, 30, 60, 100],
-            ticktext: ['0 (Poor)', '30 (Ideal)', '60 (Good)', '100 (Warning)']
-        },
-        {
-            label: 'Total SO₂ (mg/L)',
-            values: [parseFloat(data.total_sulfur_dioxide), idealValues.total_sulfur_dioxide],
-            range: ranges.total_sulfur_dioxide,
-            tickvals: [0, 50, 100, 150, 300],
-            ticktext: ['0 (Poor)', '50 (Poor)', '100 (Ideal)', '150 (Good)', '300 (Poor)']
-        },
-        {
-            label: 'Density (g/cm³)',
-            values: [parseFloat(data.density), idealValues.density],
-            range: ranges.density,
-            tickvals: [0.9, 0.995, 1.1],
-            ticktext: ['0.9 (Good)', '0.995 (Ideal)', '1.1 (Poor)']
-        },
-        {
-            label: 'pH',
-            values: [parseFloat(data.ph), idealValues.ph],
-            range: ranges.ph,
-            tickvals: [2.5, 3.0, 3.3, 3.6, 4.5],
-            ticktext: ['2.5 (Poor)', '3.0 (Good)', '3.3 (Ideal)', '3.6 (Good)', '4.5 (Poor)']
-        },
-        {
-            label: 'Sulphates (g/L)',
-            values: [parseFloat(data.sulphates), idealValues.sulphates],
-            range: ranges.sulphates,
-            tickvals: [0, 0.6, 0.8, 1.2, 2],
-            ticktext: ['0 (Poor)', '0.6 (Good)', '0.8 (Ideal)', '1.2 (Good)', '2 (Warning)']
-        },
-        {
-            label: 'Alcohol (% vol.)',
-            values: [parseFloat(data.alcohol), idealValues.alcohol],
-            range: ranges.alcohol,
-            tickvals: [8, 10, 12, 15],
-            ticktext: ['8 (Poor)', '10 (Warning)', '12 (Ideal)', '15 (Good)']
-        }
-    ];
-    
-    // Create parallel coordinates plot
-    const parallelData = [{
-        type: 'parcoords',
+    const radarData = [{
+        type: 'scatterpolar',
+        r: [
+            (parseFloat(data.fixed_acidity) - 3) / 12 * 100,
+            (1.5 - parseFloat(data.volatile_acidity)) / 1.5 * 100, // Lower is better
+            parseFloat(data.citric_acid) / 1 * 100,
+            parseFloat(data.residual_sugar) / 20 * 100,
+            (0.5 - parseFloat(data.chlorides)) / 0.5 * 100, // Lower is better
+            parseFloat(data.free_sulfur_dioxide) / 100 * 100,
+            (300 - parseFloat(data.total_sulfur_dioxide)) / 300 * 100, // Lower is better
+            (1.1 - parseFloat(data.density)) / 0.2 * 100, // Lower is better
+            (parseFloat(data.ph) - 2.5) / 2 * 100,
+            parseFloat(data.sulphates) / 2 * 100,
+            (parseFloat(data.alcohol) - 8) / 7 * 100
+        ],
+        theta: [
+            'Fixed Acidity', 
+            'Low Volatile Acidity', 
+            'Citric Acid', 
+            'Residual Sugar', 
+            'Low Chlorides', 
+            'Free SO₂', 
+            'Low Total SO₂', 
+            'Low Density', 
+            'pH', 
+            'Sulphates', 
+            'Alcohol'
+        ],
+        fill: 'toself',
+        name: 'Wine Quality Factors',
         line: {
-            color: [0, 1],
-            colorscale: [[0, '#8e44ad'], [1, '#2ecc71']],
-            showscale: true,
-            colorbar: {
-                title: 'Sample',
-                tickvals: [0, 1],
-                ticktext: ['Current', 'Ideal']
-            }
+            color: '#8e44ad'
         },
-        dimensions: dimensions
+        fillcolor: 'rgba(142, 68, 173, 0.5)'
     }];
     
-    const parallelLayout = {
-        title: 'Wine Quality Factors Comparison',
-        height: 500,
-        margin: { l: 80, r: 80, t: 80, b: 40 },
+    const radarLayout = {
+        autosize: true,
+        height: 400,
+        polar: {
+            radialaxis: {
+                visible: true,
+                range: [0, 100]
+            }
+        },
+        title: 'Wine Quality Factors',
+        showlegend: false,
         paper_bgcolor: 'rgba(0,0,0,0)',
         font: { color: "#2c3e50", family: "Roboto" }
     };
@@ -447,127 +332,45 @@ function createRadarChart(data) {
         displayModeBar: false
     };
     
-    Plotly.newPlot('radar-chart', parallelData, parallelLayout, config);
+    Plotly.newPlot('radar-chart', radarData, radarLayout, config);
 }
 
-// Function to create diverging bar chart (replacing comparison chart)
+// Function to create comparison chart
 function createComparisonChart(data, predictedQuality) {
-    // Define ideal values
-    const idealValues = {
-        'alcohol': 12.0,
-        'fixed_acidity': 7.5,
-        'volatile_acidity': 0.4,
-        'sulphates': 0.8
-    };
-    
-    // Calculate differences from ideal values
-    const params = ['Alcohol', 'Fixed Acidity', 'Volatile Acidity', 'Sulphates'];
-    const currentValues = [
-        parseFloat(data.alcohol),
-        parseFloat(data.fixed_acidity),
-        parseFloat(data.volatile_acidity),
-        parseFloat(data.sulphates)
-    ];
-    const idealValuesArray = [
-        idealValues.alcohol,
-        idealValues.fixed_acidity,
-        idealValues.volatile_acidity,
-        idealValues.sulphates
-    ];
-    
-    // Calculate differences
-    const differences = currentValues.map((val, i) => {
-        // For volatile acidity, lower is better, so invert the difference
-        if (params[i] === 'Volatile Acidity') {
-            return idealValuesArray[i] - val;
-        }
-        return val - idealValuesArray[i];
-    });
-    
-    // Determine colors based on difference magnitude
-    const colors = differences.map((diff, i) => {
-        const absDiff = Math.abs(diff);
-        const threshold = Math.abs(idealValuesArray[i]) * 0.1; // 10% of ideal value as threshold
-        
-        if (absDiff < threshold * 0.5) {
-            return "#2ecc71"; // Good (green)
-        } else if (absDiff < threshold) {
-            return "#f39c12"; // Warning (orange)
-        } else {
-            return "#e74c3c"; // Poor (red)
-        }
-    });
-    
-    // Create hover text
-    const hoverText = differences.map((diff, i) => {
-        let diffText;
-        if (params[i] === 'Volatile Acidity') {
-            // For volatile acidity, explain that lower is better
-            diffText = diff > 0 ? 
-                `${Math.abs(diff).toFixed(2)} lower than ideal (good)` : 
-                `${Math.abs(diff).toFixed(2)} higher than ideal (bad)`;
-        } else {
-            diffText = `${diff > 0 ? '+' : ''}${diff.toFixed(2)} from ideal`;
-        }
-        
-        return `Parameter: ${params[i]}<br>` +
-               `Current: ${currentValues[i].toFixed(2)}<br>` +
-               `Ideal: ${idealValuesArray[i].toFixed(2)}<br>` +
-               `Difference: ${diffText}`;
-    });
-    
-    // Create diverging bar chart
-    const divergingData = [{
-        type: 'bar',
-        x: params,
-        y: differences,
-        marker: {
-            color: colors
+    const comparisonData = [
+        {
+            x: ['Alcohol', 'Fixed Acidity', 'Volatile Acidity', 'Sulphates'],
+            y: [
+                parseFloat(data.alcohol), 
+                parseFloat(data.fixed_acidity), 
+                parseFloat(data.volatile_acidity), 
+                parseFloat(data.sulphates)
+            ],
+            type: 'bar',
+            name: 'Your Sample',
+            marker: {
+                color: '#8e44ad'
+            }
         },
-        text: hoverText,
-        hoverinfo: 'text'
-    }];
+        {
+            x: ['Alcohol', 'Fixed Acidity', 'Volatile Acidity', 'Sulphates'],
+            y: [12, 7.5, 0.4, 0.8], // Ideal values for high-quality wine
+            type: 'bar',
+            name: 'Ideal Values',
+            marker: {
+                color: '#2ecc71'
+            }
+        }
+    ];
     
-    // Add zero line and annotations
-    const divergingLayout = {
-        title: 'Difference from Ideal Values',
+    const comparisonLayout = {
+        autosize: true,
         height: 400,
-        margin: { t: 80, r: 30, l: 50, b: 50 },
+        title: 'Your Sample vs. Ideal Values',
+        barmode: 'group',
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        font: { color: "#2c3e50", family: "Roboto" },
-        xaxis: {
-            title: null,
-            showgrid: false
-        },
-        yaxis: {
-            title: 'Difference from Ideal',
-            zeroline: true,
-            zerolinecolor: 'black',
-            zerolinewidth: 2,
-            gridcolor: 'rgba(0,0,0,0.1)'
-        },
-        shapes: [{
-            type: 'line',
-            x0: -0.5,
-            x1: params.length - 0.5,
-            y0: 0,
-            y1: 0,
-            line: {
-                color: 'black',
-                width: 2,
-                dash: 'dot'
-            }
-        }],
-        annotations: differences.map((diff, i) => ({
-            x: params[i],
-            y: diff,
-            text: diff > 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1),
-            showarrow: true,
-            arrowhead: 0,
-            ax: 0,
-            ay: diff > 0 ? -20 : 20
-        }))
+        font: { color: "#2c3e50", family: "Roboto" }
     };
     
     const config = {
@@ -575,7 +378,7 @@ function createComparisonChart(data, predictedQuality) {
         displayModeBar: false
     };
     
-    Plotly.newPlot('comparison-chart', divergingData, divergingLayout, config);
+    Plotly.newPlot('comparison-chart', comparisonData, comparisonLayout, config);
 }
 
 function generateRecommendations(data, predictedQuality) {
