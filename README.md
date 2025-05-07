@@ -68,7 +68,10 @@ This project can be deployed on Render.com, a free hosting platform for web serv
      ```
    - Set the start command to:
      ```
-     python app.py
+     python app.py # To run the Flask app
+
+     # or
+     python app.py --cli # To run the command-line interface
      ```
    - Choose the environment as Python 3.
 
