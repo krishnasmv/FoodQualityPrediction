@@ -68,9 +68,8 @@ This project can be deployed on Render.com, a free hosting platform for web serv
      ```
    - Set the start command to:
      ```
-     python app.py # To run the Flask app
+     python app.py # To run the Flask app (or)
 
-     # or
      python app.py --cli # To run the command-line interface
      ```
    - Choose the environment as Python 3.
@@ -86,5 +85,3 @@ This project can be deployed on Render.com, a free hosting platform for web serv
 - You can monitor logs and redeploy from the Render dashboard.
 
 This setup allows you to host your FoodQualityPrediction Flask app for free on Render.com.
-
-![Alt Text](Images/Index.png)
